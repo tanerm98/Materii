@@ -28,7 +28,7 @@ void matrix_row(int m, int n, double *a, double *b, double *c)
 {
    int i, j;
 
-	omp_set_num_threads(8)
+	omp_set_num_threads(8);
     #pragma omp parallel private (i, j) shared(a, b, c, n, m)
     {
         for (i = 0; i < m; i++) {
