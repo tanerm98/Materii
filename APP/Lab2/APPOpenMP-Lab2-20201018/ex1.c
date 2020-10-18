@@ -27,7 +27,7 @@ int main (int argc, char *argv[])
       printf("Number of threads = %d\n", nthreads);
     }
 
-    #pragma omp for schedule(dynamic,chunk)
+    #pragma omp for schedule(static,chunk)
     for (i=0; i<N; i++)
     {
       c[i] = a[i] + b[i];
@@ -35,6 +35,6 @@ int main (int argc, char *argv[])
 
   }
   t2 = omp_get_wtime();
-  printf("Execution time %g",t2-t1);
+  printf("Execution time %g\n",t2-t1);
 
 }

@@ -23,9 +23,10 @@ void main () {
    */
   double t1,t2;
   t1 = omp_get_wtime();
+  #pragma omp parallel for private(i, x) shared(step, num_steps) reduction(+:sum)
   for ( i = 1; i <= num_steps; i++){
      x = ( i - 0.5 ) * step;
-     sum = sum + 4.0 / ( 1.0 + x * x );
+     sum += 4.0 / ( 1.0 + x * x );
   }
   t2 = omp_get_wtime();
   printf("Execution time %g\n",t2-t1);

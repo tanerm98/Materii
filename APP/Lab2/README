@@ -14,6 +14,20 @@ Tema de aici: https://curs.upb.ro/mod/assign/view.php?id=39327
 		- nu merge makefile-ul
 		- am folosit codul de aici: https://gist.github.com/florinrm/2aaa774c220bc9cb502571af5390d3dd
 		- nu merge comanda de compilare: cc -xopenmp -xO3 helloworld.c -o helloworld
-			- cc: error: language O3 not recognized
+			- "cc: error: language O3 not recognized"
+		- nu merge nici g++ matrix_array_multiplication_col.c -o matrix_array_multiplication_col -fopenmp -fdump-tree-all
+			- "error: invalid conversion from ‘void*’ to ‘double*’ [-fpermissive]""
 
 Tema de aici: https://curs.upb.ro/mod/folder/view.php?id=39328
+	- ex1:
+		- am rulat de mai multe ori, am observat ca sunt 4 threaduri si are timpi constanti ~0.05s
+		- am modificat in static scheduling, timpii s-au redus la ~0.02
+		- cand sarcinile sunt egale intre threaduri, e mai rapid static decat dynamic, probabil din cauza barierelor
+	- ex2:
+		- cod normal neoptimizat:
+			Execution time 0.129008
+            The computed value of pi is 3.141593
+        - cod cu reduction:
+			Execution time 0.0394698
+            The computed value of pi is 3.141593
+	- ex3:
