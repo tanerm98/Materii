@@ -2,3 +2,9 @@ https://docs.google.com/presentation/d/132mofRTMe0u-A0SY2a4cAzlPAM7b20eyYePvadfT
 
 #pragma omp parallel for schedule(scheduling-type [,chunk-size])
 	scheduling-type: static, dynamic, runtime, auto, guided
+
+Tema de aici: https://curs.upb.ro/mod/assign/view.php?id=39327
+	- ex1: omp_mm_1.c
+		gcc-9 omp_mm_1.c -o omp_mm_1 -fopenmp -fdump-tree-all && ./open_mm_1
+	- ex2: omp_mm_2.c
+		gcc-9 omp_mm_1.c -o omp_mm_2 -fopenmp -fdump-tree-all && ./open_mm_2

@@ -6,15 +6,15 @@
 #define NCA 15                 /* number of columns in matrix A */
 #define NCB 7                  /* number of columns in matrix B */
 
-int main (int argc, char *argv[]) 
+int main (int argc, char *argv[])
 {
-    int	tid, nthreads, i, j, k, chunk = 10;
+    int	tid, nthreads, i, j, k, chunk = 10, sum;
+    double t1, t2;
     double	a[NRA][NCA],           /* matrix A to be multiplied */
         b[NCA][NCB],           /* matrix B to be multiplied */
         c[NRA][NCB];           /* result matrix C */
 
-    chunk = 10; // dimensiunea chunk-ului la schedule
-
+	t1 = omp_get_wtime();
     /*** Spawn a parallel region explicitly scoping all variables ***/
     #pragma omp parallel shared(a, b, c, nthreads, chunk) private(tid, i, j, k)
     {
@@ -24,52 +24,55 @@ int main (int argc, char *argv[])
             printf("Starting matrix multiple example with %d threads\n",nthreads);
             printf("Initializing matrices...\n");
         }
-        
+
         /*** Initialize matrices ***/
-        #pragma omp for schedule (static, chunk) 
+        #pragma omp for schedule (guided, chunk)
         for (i = 0; i < NRA; i++) {
             for (j = 0; j< NCA; j++) {
                 a[i][j] = i + j;
             }
         }
-        
-        #pragma omp for schedule (static, chunk)
+
+        #pragma omp for schedule (guided, chunk)
         for (i = 0; i < NCA; i++) {
             for (j = 0; j < NCB; j++) {
                 b[i][j]= i * j;
             }
         }
-        
-        #pragma omp for schedule (static, chunk)
+
+        #pragma omp for schedule (guided, chunk)
         for (i = 0; i < NRA; i++) {
             for (j = 0; j < NCB; j++) {
                 c[i][j] = 0;
             }
         }
 
+
         /*** Do matrix multiply sharing iterations on outer loop ***/
         /*** Display who does which iterations for demonstration purposes ***/
-        printf("Thread %d starting matrix multiply...\n",tid);
-        #pragma omp for schedule (static, chunk)
+        printf("Thread %d starting matrix multiply...\n", tid);
+        #pragma omp for schedule (guided, chunk) private(sum)
         for (i = 0; i < NRA; i++) {
-            printf("Thread=%d did row=%d\n",tid,i);
-            for (j = 0; j < NCB; j++) {  
+            printf("Thread=%d did row=%d\n", tid, i);
+            for (j = 0; j < NCB; j++) {
                 for (k = 0; k < NCA; k++) {
                     c[i][j] += a[i][k] * b[k][j];
                 }
             }
         }
     }   /*** End of parallel region ***/
+	t2 = omp_get_wtime();
+    printf("Total execution time = %lf\n", (t2 - t1));
 
     /*** Print results ***/
     printf("******************************************************\n");
     printf("Result Matrix:\n");
-    
+
     for (i = 0; i < NRA; i++) {
-        for (j = 0; j < NCB; j++) { 
+        for (j = 0; j < NCB; j++) {
             printf("%6.2f   ", c[i][j]);
         }
-        printf("\n"); 
+        printf("\n");
     }
 
     printf("******************************************************\n");
