@@ -1,3 +1,5 @@
 **/venv
 **/virtualenv
 **/**.c.**
+*.c.*
+.idea/
