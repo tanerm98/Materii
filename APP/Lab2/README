@@ -8,3 +8,6 @@ Tema de aici: https://curs.upb.ro/mod/assign/view.php?id=39327
 		gcc-9 omp_mm_1.c -o omp_mm_1 -fopenmp -fdump-tree-all && ./open_mm_1
 	- ex2: omp_mm_2.c
 		gcc-9 omp_mm_1.c -o omp_mm_2 -fopenmp -fdump-tree-all && ./open_mm_2
+	- ex3 & ex4 - rulate pe cluster
+
+Tema de aici: https://curs.upb.ro/mod/folder/view.php?id=39328
