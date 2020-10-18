@@ -1,0 +1,2 @@
+gcc-9 sum_openmp.c -o sum_openmp -fopenmp -fdump-tree-all
+gcc-9 for_loop.c -o out -fopenmp -fdump-tree-all && ./out

@@ -1,0 +1,4 @@
+https://docs.google.com/presentation/d/132mofRTMe0u-A0SY2a4cAzlPAM7b20eyYePvadfT9-E/edit#slide=id.p
+
+#pragma omp parallel for schedule(scheduling-type [,chunk-size])
+	scheduling-type: static, dynamic, runtime, auto, guided
