@@ -17,6 +17,12 @@ Tema de aici: https://curs.upb.ro/mod/assign/view.php?id=39327
 			- "cc: error: language O3 not recognized"
 		- nu merge nici g++ matrix_array_multiplication_col.c -o matrix_array_multiplication_col -fopenmp -fdump-tree-all
 			- "error: invalid conversion from ‘void*’ to ‘double*’ [-fpermissive]""
+		- pana la urma am reparat makefile si am rulat pe cluster cu `ActivitateLaborator2/mxv/run_on_cluster.sh`
+			- ----------------------------------------------------------------------
+                 M    N   Mem(KB)   Threads   Thresholds       Performance (Mflop/s)
+                                               Row   Col       Row      Col      Lib
+              ----------------------------------------------------------------------
+                 0    0      0.00         1      1     1      -nan     -nan      0.0
 
 Tema de aici: https://curs.upb.ro/mod/folder/view.php?id=39328
 	- ex1:
@@ -31,3 +37,8 @@ Tema de aici: https://curs.upb.ro/mod/folder/view.php?id=39328
 			Execution time 0.0394698
             The computed value of pi is 3.141593
 	- ex3:
+		- gcc-9 ex3.c -o ex3 -fopenmp -fdump-tree-all
+		- A:16, B:17, C:12, D:16, E:7, F:17, G:12, H:17, I:14, J:16, K:11, L:13, M:10, N:18, O:14, P:13, Q:12, R:7, S:9, T:16, U:13, V:16, W:15, X:18, Y:16, Z:19,
+          Serial execution time: 0.00063881
+          A:16, B:17, C:12, D:16, E:7, F:17, G:12, H:17, I:14, J:16, K:11, L:13, M:10, N:18, O:14, P:13, Q:12, R:7, S:9, T:16, U:13, V:16, W:15, X:18, Y:16, Z:19,
+          Parallel execution time: 0.000423897
