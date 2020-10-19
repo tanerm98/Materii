@@ -1,0 +1,55 @@
+ex1
+	- show version
+ex2
+	- conf t
+	- line con 0
+	- logging synchronous
+ex3
+	- conf t
+	- line con 0
+	- exec-timeout 0 0 || no exec-timeout
+ex4
+	- 1000:babe::10/122
+		- 0000:0000 -> ::
+		- 1000:babe:0000:0000:0000:0000:0000:0010/122
+		- 0010 -> 0000 0000 00|01 0000
+		- 1000:babe::/122
+	- R10-R7 6 adrese
+		- /125
+		- 1000:babe::0000/125 -> 1000:babe::0007/125
+	- R8-R10 5 adrese
+		- /125
+		- 1000:babe::0008/125 -> 1000:babe::000f/125
+	- restul 3, cate 2 adrese
+		- /126
+			- 1000:babe::0010/126 - 1000:babe::0013/126
+		- /126
+			- 1000:babe::0014/126 - 1000:babe::0017/126
+		- /126
+			- 1000:babe::0018/126 - 1000:babe::001b/126
+ex5a
+	- conf t
+	- int fa0/0
+	- ipv6 add 1000:babe::1/125
+	- no shutdown
+ex5b
+	R4
+	- conf t
+	- int fa2/0
+	- ipv6 add 1000:bae:02::/64 eui-64
+	- no shutdown
+	- do show ipv6 int br
+ex6
+	- enable secret PRislife
+	- username emi password pian
+	- line vty 0 4
+	- transport input telnet
+	- login local
+	- exit
+ex7
+	- do show cli history 100
+	- terminal history size 100
+	- show history
+ex8
+	- do write
+	- do copy running-config startup-config
