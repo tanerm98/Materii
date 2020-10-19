@@ -10,7 +10,7 @@
 FAST     =                                #-- Most important for performance                 
 EXTRA    =  #-- Additional optimization options
 PAR      =                 #-- Auto-parallelization options
-OMP      = -xopenmp -xvpara -xloopinfo                                    #-- OpenMP parallelization options
+OMP      = -fopenmp                                   #-- OpenMP parallelization options
 
 #-----------------------------------------------------------------------
 # These are threshold values to be changed as part of the OpenMP lab
@@ -23,8 +23,8 @@ THRESHOLD_COL = 1
 #-----------------------------------------------------------------------
 PROCS    = 1 2                   #-- Number of threads used for parallel jobs
 DEBUG    = -g                    #-- Debug and compiler commentary
-ISA      = -xarch=sse2         #-- Instruction set
-OPT_BASE = -dalign $(ISA)        #-- Options for basic routines
+ISA      = -std=gnu99         #-- Instruction set
+OPT_BASE = $(ISA)        #-- Options for basic routines
 OPT      = $(FAST) $(EXTRA)
 CFLAGS   = $(OPT) $(ISA)
 LDFLAGS  = $(OPT) $(ISA)
@@ -32,7 +32,7 @@ SATSLIB  =
 PERFLIB  = 
 LIBS     = -lm
 MEMALLOC = -lumem
-MOMP     = -xopenmp -xO3
+MOMP     = -fopenmp -xO3
 CC       = cc
 F95      = f95
 CODE     = mxv_base
