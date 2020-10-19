@@ -21,7 +21,7 @@ THRESHOLD_COL = 1
 #-----------------------------------------------------------------------
 # No Changes Needed Below This Line
 #-----------------------------------------------------------------------
-PROCS    = 1 2                   #-- Number of threads used for parallel jobs
+PROCS    = 1 2 4 8                 #-- Number of threads used for parallel jobs
 DEBUG    = -g                    #-- Debug and compiler commentary
 ISA      = -std=gnu99         #-- Instruction set
 OPT_BASE = $(ISA)        #-- Options for basic routines

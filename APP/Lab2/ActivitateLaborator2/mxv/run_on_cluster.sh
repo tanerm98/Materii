@@ -1,6 +1,7 @@
 #!/bin/bash
 
-make <compile_target>
-mare <run_target>
+./mxv_base
+./mxv_par
+./mxv_omp
 
 # qsub -q all.q -cwd ./run_on_cluster.sh
