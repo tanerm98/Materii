@@ -1,0 +1,40 @@
+Mustafa Taner - 341C1 - SM - Laborator 2
+
+- pt 0.5 puncte:
+    - exercitiul 8: cod + grafice
+        - codul este in `ex1.py`
+            - rulare (cwd="Lab2"):
+                """
+                    python3 -m venv venv
+                    source venv/bin/activate
+                    pip install matplotlib
+                    python3 ex1.py
+                """
+        - am atasat si graficul `ex1.png`
+
+- pt 1 punct:
+    - QuickSort:
+        - complexitate seriala: O(1) = n log n, T(1) = n log n
+        - complexitate paralela: O(n) = n log n, T(n) = log² n
+
+            S(n) = n / log n
+            E(n) = 1 / log n
+            R(n) = 1
+            U(n) = 1 / log n
+            Q(n) = n / log² n
+
+    - codul este in `ex2.py`
+        - rulare (cwd="Lab2"):
+            """
+                python3 -m venv venv
+                source venv/bin/activate
+                pip install matplotlib
+                python3 ex2.py
+            """
+    - am atasat si graficul `ex2.png`
+    
+    - explicatii:
+        Pt n >= 2:
+            1/n <= E(n) = U(n) <= 1
+            0 <= Q(n) <= S(n) <= n
+
