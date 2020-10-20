@@ -1,0 +1,6 @@
+Mustafa Taner - 341C1 - Lab 1 SM
+
+Observ ca implementarile CREW si CRCW paralele dureaza mai mult decat versiunea secventiala...
+
+Am introdus loguri pentru a se vedea etapele exacte ale paralelizarii.
+Pentru a modifica dimensiunile matricilor, trebuie modificat doar N.

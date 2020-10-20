@@ -1,0 +1,12 @@
+Mustafa Taner - 341C1 - Lab 1 SPRC
+
+CHECK response code: <Response [200]>
+CHECK response text: {"status":"ok","proof":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ3aG8iOnsibnVtZSI6WyJNdXN0YWZhIFRhbmVyIl0sImdydXBhIjpbIjM0MUMxIl19LCJkaWQiOiJ0YXNrMSJ9._ioe6LWF0Tsfyt5OPx1lVxNdW95vUCKCeo_W7fWdOj8"}
+CHECK response code: <Response [200]>
+CHECK response text: {"status":"ok","proof":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ3aG8iOnsibnVtZSI6Ik11c3RhZmEgVGFuZXIifSwiZGlkIjoidGFzazIifQ.ZabYWVMazqExQzg2fOQS5_dYN5rDvZw8Iwrg_9Tk2BM"}
+CHECK response code: <Response [200]>
+CHECK response text: Login succesful! You will be recognised as Mustafa Taner for 10 sec.
+CHECK response code: <Response [200]>
+CHECK response text: {"status":"ok","proof":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ3aG8iOnsibnVtZSI6Ik11c3RhZmEgVGFuZXIifSwiZGlkIjoidGFzazMifQ.ukZdOONJ1uBwtl2Vh1gTCx1wZZil89WA5gqIFicgHcM"}
+
+
