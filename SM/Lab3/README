@@ -1,0 +1,14 @@
+Taner Mustafa - 341C1 - SM - Laborator 3
+
+Am facut partea de software a laboratorului - `lab3.py`
+Inputul si outputul se scriu in cod, in `main`: `INPUT` & `OUTPUT`
+Explicatii si comentarii se afla in cod.
+
+Abordare, pe scurt:
+ - caz general de circuit Omega, cu N intrari si N iesiri, log(N) conexiuni shuffle - N calculat pe baza INPUT (sau OUTPUT)
+    - pentru cazul cu numar diferit de conexiuni shuffle, am scris in cod ca trebuie indentat un `if`
+ - generez toate combinatiile posibile de tipuri de blocuri
+ - incerc fiecare combinatie in parte - iau INPUT, il duc prin schema si vad daca da egal cu OUTPUT
+
+ Rulare:
+    - python3 lab3.py
