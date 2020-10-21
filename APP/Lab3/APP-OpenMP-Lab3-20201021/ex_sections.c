@@ -12,32 +12,97 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define N 100000000
-float a[N], b[N], c[N], d[N];
+#define N 10000000
+float *a, *b, *c, *d;
 
 int main (int argc, char *argv[]) 
 {
+
+	a = (float*) malloc (N * sizeof(float));
+	b = (float*) malloc (N * sizeof(float));
+	c = (float*) calloc (N, sizeof(float));
+	d = (float*) calloc (N, sizeof(float));
+
     int i;
     double t1,t2;
     /* Some initializations */
-    for (i=0; i<N; i++) {
+    #pragma omp parallel for private(i) shared(a, b)
+    for (i = 0; i < N; i++) {
         a[i] = i * 1.5;
         b[i] = i + 22.35;
-        c[i] = d[i] = 0.0;
-    }
-    t1 = omp_get_wtime();
-    for (i=0; i<N; i++)
-    {
-        c[i] = sin(a[i] + b[i]);
     }
 
-    for (i=0; i<N; i++)
-    {
-        d[i] = sqrt(a[i] * b[i]);
+	////////////////////////////SERIAL//////////////////////////////////////////////////////////////////////////////////
+    t1 = omp_get_wtime();
+    for (i=0; i<N; i++) {
+        c[i] = a[i] + b[i];
+    }
+    for (i=0; i<N; i++) {
+        d[i] = a[i] * b[i];
     }
     t2 = omp_get_wtime();
+    printf("Duration serial:                                    %g\n",t2-t1);
 
-    printf("Duration %g\n",t2-t1);
+	////////////////////////////////PARALLEL FORS///////////////////////////////////////////////////////////////////////
+    t1 = omp_get_wtime();
+    #pragma omp parallel for private(i) shared(c)
+    for (i=0; i<N; i++) {
+        c[i] = a[i] + b[i];
+    }
+    #pragma omp parallel for private(i) shared(d)
+    for (i=0; i<N; i++) {
+        d[i] = a[i] * b[i];
+    }
+    t2 = omp_get_wtime();
+    printf("Duration parallel fors:                             %g\n",t2-t1);
+
+	////////////////////////////////2 PARALLEL SECTIONS/////////////////////////////////////////////////////////////////
+    t1 = omp_get_wtime();
+    #pragma omp parallel
+    {
+        #pragma omp sections
+        {
+            #pragma omp section
+            {
+                for (i=0; i<N; i++) {
+                    c[i] = a[i] + b[i];
+                }
+            }
+            #pragma omp section
+            {
+                for (i=0; i<N; i++) {
+                    d[i] = a[i] * b[i];
+                }
+            }
+        }
+    }
+    t2 = omp_get_wtime();
+    printf("Duration 2 parallel sections:                       %g\n",t2-t1);
+
+    /////////////////////////////////2 PARALLEL SECTIONS WITH PARALLEL FORS/////////////////////////////////////////////
+    t1 = omp_get_wtime();
+    #pragma omp parallel
+    {
+        #pragma omp sections
+        {
+            #pragma omp section
+            {
+                #pragma omp parallel for private(i) shared(c)
+                for (i=0; i<N; i++) {
+                    c[i] = a[i] + b[i];
+                }
+            }
+            #pragma omp section
+            {
+                #pragma omp parallel for private(i) shared(d)
+                for (i=0; i<N; i++) {
+                    d[i] = a[i] * b[i];
+                }
+            }
+        }
+    }
+    t2 = omp_get_wtime();
+    printf("Duration 2 parallel sections with parallel fors:    %g\n",t2-t1);
 
     return 0;
 }

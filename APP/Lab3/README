@@ -1,0 +1,62 @@
+Taner Mustafa - 341C1 - APP - Lab 3
+
+
+Exercitii din sectiunea `APP OpenMP - Lab3` - in `APP-OpenMP-Lab3-20201021`
+	- ex1: "Scrieti un program paralel in care sa folositi SECTIONS. Afisati thread-id in cadrul programului. Ce observati?"
+		- Cod sursa: `ex1.c`
+		- Command to compile and run (cwd=`Lab3/APP-OpenMP-Lab3-20201021`):
+			```
+				mkdir exec
+				cd exec
+				gcc-9 ../ex1.c -o ex1 -fopenmp -fdump-tree-all
+				./ex1
+			```
+		- sunt folosite atatea threaduri cate sectiuni sunt - restul raman nefolosite
+
+	- ex2: "Modificati programul ex_sections.c pentru a beneficia de OpenMP sections."
+		- Cod sursa: `ex_sections.c`
+		- Command to compile and run (cwd=`Lab3/APP-OpenMP-Lab3-20201021`):
+			```
+				mkdir exec
+				cd exec
+				gcc-9 ../ex_sections.c -o ex_sections -fopenmp -fdump-tree-all -lm
+				./ex_sections
+			```
+		- l-am facut pe 4 variante; timpii scosi:
+			```
+				Duration serial:                                    0.0800536
+	            Duration parallel for:                              0.0255921
+	            Duration 2 parallel sections:                       0.0660478
+	            Duration 2 parallel sections with parallel fors:    0.0327958
+			```
+
+	- ex3:
+		- nu compileaza cu makefile-ul ala
+
+
+Exercitii din sectiunea `Activitate Laborator 3` - in `Activitate`
+	- ex1: acelasi ca la sectiunea anterioara
+
+	- ex2: "Experimentati cu lucrurile invatate in acest laborator si in cele precedente pentru a mari performantele
+			urmatorului cod pentru inmultirea a doua matrice."
+		- Cod sursa: `omp_mm.c`
+		- nu mi se pare ca imbunatatesc codul daca folosesc SECTIONS sau orice altceva din acest lab
+		- Command to compile and run (cwd=`Lab3/APP-OpenMP-Lab3-20201021`):
+	        ```
+	            mkdir exec
+	            cd exec
+	            gcc-9 ../omp_mm.c -o omp_mm -fopenmp -fdump-tree-all
+	            ./omp_mm
+	        ```
+
+    - ex3: "Schimbati politicile de scheduling pentru exemplul precedent si imbunatatiti astfel performantele."
+        - Cod sursa: 'omp_mm_1.c'
+        - Command to compile and run (cwd=`Lab3/APP-OpenMP-Lab3-20201021`):
+                ```
+                    mkdir exec
+                    cd exec
+                    gcc-9 ../omp_mm_1.c -o omp_mm_1 -fopenmp -fdump-tree-all
+                    ./omp_mm_1
+                ```
+
+	- ex4: acekasu ca ex3 de la sectiunea anterioara
