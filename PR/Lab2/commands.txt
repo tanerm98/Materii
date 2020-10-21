@@ -1,0 +1,154 @@
+﻿OSPF:
+* Router:
+* De backbone (Area 0)
+* De margine (area border router)
+* Autonomous system border router (face conexiunea cu alte retele)
+
+
+DR,BDR, DRother
+* Designated router
+* Backup DR
+* Restul
+
+
+Ex1:
+        ipv6 route <destination_network> <next_hop>
+
+
+* R9
+   * conf t
+   * do sh ipv6 int br
+   * ipv6 route ::/0 1000:babe::1a
+
+
+* R1:
+   * Rute catre:
+      * Loopback 10 x 2
+      * Loopback r9, r9-r8
+      * R10-r8, loopback r8
+      * Loopback r7, r10-r7
+   * conf t
+   * ipv6 route 1000:face::/124 1000:babe::1d
+   * ipv6 route 1000:face::10/124 1000:babe::11
+   * ipv6 route 1000:face::20/124 1000:babe::1D
+   * ipv6 route 1000:babe::18/126 1000:babe::1D
+   * ipv6 route 1000:face::30/125 1000:babe::1d
+   * ipv6 route 1000:babe::8/125 1000:babe::1d
+   * ipv6 route 1000:face::38/125 1000:babe::11
+   * ipv6 route 1000:babe::/125 1000:babe::11
+* R8
+   * Rute catre:
+      * Loopback R9, Lb R10 x 2, Lb R7
+      * R10-R7, R7-R1
+   * conf t
+   * ipv6 route 1000:face::10/124 1000:babe::a
+   * ipv6 route 1000:face::0/124 1000:babe::a
+   * ipv6 route 1000:face::20/124 1000:babe::19
+   * ipv6 route 1000:face::38/125  1000:babe::a
+   * ipv6 route 1000:babe::/125 1000:babe::a
+   * ipv6 route 1000:babe::10/126 1000:babe::1e
+* R10
+   * Rute catre:
+      * Lb R8, Lb R7, Lb R9
+      * R9-R8, R8-R1, R7-R1
+   * conf t
+   * ipv6 route 1000:face::20/124 1000:babe::9
+   * ipv6 route 1000:face::30/125 1000:babe::9
+   * ipv6 route 1000:face::38/125 1000:babe::1
+   * ipv6 route 1000:babe::10/126 1000:babe::1
+   * ipv6 route 1000:babe::1c/126 1000:babe::9
+   * ipv6 route 1000:babe::18/126 1000:babe::9
+* R7:
+   * Rute catre:
+      * R10 Lb x2, R8 Lb, R9 Lb
+      * R10-R8, R1-R8, R9-R8
+   * conf t
+   * ipv6 route 1000:face::/124 1000:babe::2 
+   * ipv6 route 1000:face::10/124 1000:babe::2
+   * ipv6 route 1000:babe::8/125  1000:babe::2
+   * ipv6 route 1000:babe::1c/126  1000:babe::12
+   * ipv6 route 1000:face::30/125 1000:babe::2
+   * ipv6 route 1000:face::20/124 1000:babe::2
+   * ipv6 route 1000:babe::18/126 1000:babe::2
+   * Ex2:
+* R1
+   * conf t
+   * ipv6 router ospf 1
+   * router-id 1.1.1.1
+   * exit
+   * int fa2/0
+   * ipv6 ospf 1 area 0
+* R2
+   * conf t
+   * ipv6 router ospf 1
+   * router-id 2.2.2.2
+   * exit
+   * int fa2/0
+   * ipv6 ospf 1 area 0
+* R4:
+   * conf t
+   * ipv6 router ospf 1
+   * router-id 4.4.4.4
+   * exit
+   * int fa2/0
+   * ipv6 ospf 1 area 0
+* Test: sh ipv6 ospf neighbor
+* Clear: clear ipv6 ospf process
+
+
+Ex3:
+Pentru Area 1:        
+* R2
+   * conf t
+   * int fa0/0
+   * ipv6 ospf 1 area 1 --- atentie, schimbam zona - area 1
+   * int fa1/0
+   * ipv6 ospf 1 area 1
+   * exit
+* R6
+   * conf t
+   * ipv6 router ospf 1
+   * router-id 6.6.6.6
+   * exit
+   * int fa0/0
+   * ipv6 ospf 1 area 1
+   * int fa2/0
+   * ipv6 ospf 1 area 1
+   * exit
+* R5
+   * conf t
+   * ipv6 router ospf 1
+   * router-id 5.5.5.5
+   * exit
+   * int fa1/0
+   * ipv6 ospf 1 area 1
+   * int fa2/0
+   * ipv6 ospf 1 area 1
+   * exit
+* R6 verificare
+   * do sh ipv6 route
+
+
+Similar Area 2
+
+
+Ex4:
+* Se gaseste BDR (Area 0, pe R1)
+   * R1:
+      * ipv6 ospf neighbor => R4 DR, R2 BDR
+   * R2: 
+      * conf t
+      * ipv6 router ospf 1
+      * router-id 5.5.5.5 (cel mai mare)
+      * exit
+      * exit
+      * clear ipv6 ospf process
+   * R1:
+      * clear ipv6 ospf process
+   * R4:
+      * clear ipv6 ospf process
+
+
+Ex5:
+* R7:
+* Testare: do ping ipv6 1000:face::21
