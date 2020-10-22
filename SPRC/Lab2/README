@@ -3,3 +3,7 @@ RPC
 Warmup:
 	rpcgen -C -a add.x
 	make -f Makefile.add
+
+Ex:
+	rpcgen -C -a ex.x
+	make -f Makefile.ex
