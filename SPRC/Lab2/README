@@ -1,0 +1,5 @@
+RPC
+
+Warmup:
+	rpcgen -C -a add.x
+	make -f Makefile.add
