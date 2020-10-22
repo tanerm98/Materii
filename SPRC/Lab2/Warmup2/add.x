@@ -1,12 +1,11 @@
-const MAXPRIMES = 1000;
 
 struct prime_request{
-	int min;
-	int max;
+	int a;
+	int b;
 };
 
 struct prime_result{
-	int array<MAXPRIMES>;
+	int sum;
 };
 
 program PRIMEPROG{

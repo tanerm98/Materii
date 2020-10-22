@@ -1,9 +1,14 @@
-RPC
+RPC - SPRC Lab 2 - Taner Mustafa - 341C1
 
-Warmup:
+Warmup:     #exemplul din slide-uri
 	rpcgen -C -a add.x
 	make -f Makefile.add
 
-Ex:
+Warmup2:    #warmup-ul din exercitii
+	- nu am mai schimbat denumirile functiilor ca sa imi fie mai usor sa modific
+	rpcgen -C -a add.x
+	make -f Makefile.add
+
+Ex:         #exercitiul 2 cu checker
 	rpcgen -C -a ex.x
 	make -f Makefile.ex
