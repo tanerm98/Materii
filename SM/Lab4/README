@@ -1,11 +1,15 @@
-Taner Mustafa - 341C1 - SM - Laborator 3
+Taner Mustafa - 341C1 - SM - Laborator 4
 
-Am facut partea de software a laboratorului - `lab3.py`
+Am facut partea de software a laboratorului - `lab4.py`
 Inputul si outputul se scriu in cod, in `set_input_output_values`: `INPUT` & `OUTPUT`
 Explicatii si comentarii se afla in cod.
 
 Spre deosebire de laboratorul cu retea Omega, aici nu se mai face shuffle inainte de primul etaj si s-a modificat si
 metoda de "suffle" - inainte de nivelul din mijloc, se face inverse shuffle, iar dupa el se face shuffle normal.
+
+Explicatii mai detaliate in metoda de shuffle - pe scurt, s-a tinut cont de faptul ca o retea Benes de dimensiune N
+este formata din mai multe retele Benes de dimeniune N/2, si ca reteaua Benes are N intrari, (2 * logN - 1) etaje si
+N/2 blocuri per etaj.
 
  Rulare:
     - python3 lab4.py

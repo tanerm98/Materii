@@ -33,7 +33,7 @@ def print_output(INPUT, OUTPUT, steps, nr_of_rows, nr_of_blocks):
     global result
 
     # Print result
-    print("N: {}\nk: {}\n".format(N, m))
+    print("\nN: {}\nm: {}\n".format(N, m))
     print("Input: {}\nOutput: {}\n".format(INPUT, OUTPUT))
 
     print("Block types (as seen on the scheme):")
@@ -117,33 +117,48 @@ def shuffle(index, input_level_index):
     :return: shuffled_index: the position after shuffle
     """
 
+    # no shuffle before first level
     if input_level_index == 0:
         return index
 
+    # after middle level, it's just the reverse of the first half levels
     elif input_level_index > middle_level_index:
-        for i in range(N):
-            if shuffle(i, nr_of_levels - input_level_index) == index:
-                return i
+        for shuffled_index in range(N):
+            if shuffle(shuffled_index, nr_of_levels - input_level_index) == index:
+                return shuffled_index
+        raise Exception("Shuffle error!")
 
-    elif input_level_index <= middle_level_index:
+    # first half levels
+    else:
+        # dependind on the level, compute the rank (number of inputs) of the Benes subnetwork - the shuffle depends on it
+        # subnetwork = the 8x8 Benes network is made of 2 4x4 subnetworks; 16x16 is made of 2 8x8; etc...
         rank = int(N / (2 ** (input_level_index - 1)))
+
+        # index of block where input with `index` comes from
         src_block_index = int(index / 2)
 
-        src = int(src_block_index / int(rank / 2))
-        if index % 2 == 0:
-            dst_block_index = src * int(rank / 2) + int(int(src_block_index - int(src * int(rank / 2))) / 2)
-        else:
-            dst_block_index = src * int(rank / 2) + int(int(src_block_index - int(src * int(rank / 2))) / 2) + int(rank / 4)
+        # index of Benes subnetwork the current block is part of
+        subnetwork_index = int(src_block_index / int(rank / 2))
+        index_of_first_block_of_subnetwork = subnetwork_index * int(rank / 2)
+        # index of destination block in subnetwork if input in source block is on 1st pin - relative to subnetwork indexes
+        index_of_destination_block_in_subnetwork = int(int(src_block_index - int(subnetwork_index * int(rank / 2))) / 2)
+        # index of destination block in subnetwork if input in source block is on 1st pin - relative to whole network
+        dest_block_temp = index_of_first_block_of_subnetwork + index_of_destination_block_in_subnetwork
 
+        # input on 1st pin
+        if index % 2 == 0:
+            dst_block_index = dest_block_temp
+        # input on 2nd pin
+        else:
+            dst_block_index = dest_block_temp + int(rank / 4)
+
+        # compute pin from destination block - 1st or 2nd
         if src_block_index % 2 == 0:
             shuffled_index = (dst_block_index) * 2
         else:
             shuffled_index = (dst_block_index) * 2 + 1
 
-        print("Index: {};    Shuffled: {};     Rank: {};     Src: {};      Dst: {}".format(index, shuffled_index, rank, src_block_index, dst_block_index))
         return shuffled_index
-
-    raise Exception("Error at shuffle!")
 
 
 def check_possibility(INPUT, OUTPUT, possibilities, start, end):
@@ -175,10 +190,6 @@ def check_possibility(INPUT, OUTPUT, possibilities, start, end):
             steps["{}_Shuffled".format(level)] = shuffled_values.copy()
             steps["{}_Output".format(level)] = output_values.copy()
 
-            print("{}.Input".format(level), input_values)
-            print("{}.Shuffled".format(level), shuffled_values)
-            print("{}.Output".format(level), output_values)
-
             # after level
             input_values = output_values.copy()
 
@@ -198,21 +209,29 @@ def set_input_output_values():
     :return: INPUT and OUTPUT values for Omega network
     """
     """ !!!!!!!!!!!!!!!! MODIFY HERE THE INPUT AND OUTPUT VALUES !!!!!!!!!!!!!!!!!!!!!! """
-    # these should give only DIRECT blocks - easy computation
+    # # these should give only DIRECT blocks - easy computation
     INPUT = [0, 1, 2, 3, 4, 5, 6, 7]
     OUTPUT = [0, 1, 2, 3, 4, 5, 6, 7]
-
-    # # this should give an INFERIOR block - bottom right - easy computation
+    #
+    # # these should give 1 INVERSE block - easy computation
     # INPUT = [0, 1, 2, 3, 4, 5, 6, 7]
-    # OUTPUT = [0, 1, 2, 3, 4, 5, 7, 7]
-
-    # # this should give an INVERSE block - top right - hard computation, goes through many possibilities
+    # OUTPUT = [0, 1, 2, 3, 4, 5, 7, 6]
+    #
+    # # these should give 1 SUPERIOR blocks - hard computation
     # INPUT = [0, 1, 2, 3, 4, 5, 6, 7]
-    # OUTPUT = [1, 0, 2, 3, 4, 5, 6, 7]
-
-    # # this should give an error - no possibility for this - very hard computation, goes through all the possibilities
-    # INPUT = [0, 1, 2, 3, 4, 5, 6, 7]
-    # OUTPUT = [0, 1, 2, 3, 4, 5, 6, 8]
+    # OUTPUT = [0, 1, 2, 2, 4, 5, 6, 7]
+    #
+    # # these should give only DIRECT blocks - easy computation
+    # INPUT = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    # OUTPUT = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    #
+    # # these should give 1 INVERSE block - easy computation
+    # INPUT = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    # OUTPUT = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 14]
+    #
+    # # these should give 1 SUPERIOR block - hardest computation
+    # INPUT = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    # OUTPUT = [0, 1, 2, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
 
     return INPUT, OUTPUT
 
@@ -242,18 +261,16 @@ def main():
 
     # Testing all possibilities
     nr_of_possibilities = len(BLOCK_TYPES) ** nr_of_blocks
-    # threads = []
-    # for thread in range(THREADS):
-    #     start = int(nr_of_possibilities / THREADS * len(threads))
-    #     end = int(nr_of_possibilities / THREADS * (len(threads) + 1))
-    #     threads.append(threading.Thread(target=check_possibility, args=(INPUT, OUTPUT, possibilities, start, end)))
-    #
-    # for thread in threads:
-    #     thread.start()
-    # for thread in threads:
-    #     thread.join()
+    threads = []
+    for thread in range(THREADS):
+        start = int(nr_of_possibilities / THREADS * len(threads))
+        end = int(nr_of_possibilities / THREADS * (len(threads) + 1))
+        threads.append(threading.Thread(target=check_possibility, args=(INPUT, OUTPUT, possibilities, start, end)))
 
-    check_possibility(INPUT, OUTPUT, possibilities, 0, nr_of_possibilities)
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
 
     if result is None:
         print("There is no Omega network of size {0}x{0} that can convert {1} to {2}!".format(N, INPUT, OUTPUT))
