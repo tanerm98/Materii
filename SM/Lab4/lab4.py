@@ -129,16 +129,18 @@ def shuffle(index, input_level_index):
         rank = int(N / (2 ** (input_level_index - 1)))
         src_block_index = int(index / 2)
 
-        if index % 2 == 1:
-            dst_block_index = int(src_block_index / 2)
+        src = int(src_block_index / int(rank / 2))
+        if index % 2 == 0:
+            dst_block_index = src * int(rank / 2) + int(int(src_block_index - int(src * int(rank / 2))) / 2)
         else:
-            dst_block_index = int(src_block_index / 2) + int(rank / 4)
+            dst_block_index = src * int(rank / 2) + int(int(src_block_index - int(src * int(rank / 2))) / 2) + int(rank / 4)
 
         if src_block_index % 2 == 0:
             shuffled_index = (dst_block_index) * 2
         else:
             shuffled_index = (dst_block_index) * 2 + 1
 
+        print("Index: {};    Shuffled: {};     Rank: {};     Src: {};      Dst: {}".format(index, shuffled_index, rank, src_block_index, dst_block_index))
         return shuffled_index
 
     raise Exception("Error at shuffle!")
@@ -172,6 +174,10 @@ def check_possibility(INPUT, OUTPUT, possibilities, start, end):
             steps["{}_Input".format(level)] = input_values.copy()
             steps["{}_Shuffled".format(level)] = shuffled_values.copy()
             steps["{}_Output".format(level)] = output_values.copy()
+
+            print("{}.Input".format(level), input_values)
+            print("{}.Shuffled".format(level), shuffled_values)
+            print("{}.Output".format(level), output_values)
 
             # after level
             input_values = output_values.copy()
