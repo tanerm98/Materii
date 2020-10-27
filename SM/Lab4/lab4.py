@@ -22,73 +22,6 @@ result = None
 
 THREADS = 4
 
-
-def generate_all_posibilities():
-    """
-    Generates all possible block types variations
-    :param nr_of_blocks: the total number of blocks in the network
-    :return: generated possibilities
-    """
-    blocks = [BLOCK_TYPES] * nr_of_blocks
-    product = itertools.product(*blocks)
-
-    return product
-
-
-def go_through_level(start, values, blocks):
-    """
-    Simulates the shuffled input going through a level
-    :param start: index or first block from level
-    :param values: shuffled values
-    :param blocks: all blocks
-    :return: input processed through level
-    """
-    output = [0] * N
-
-    for i in range(int(start), int(start + (N / 2))):
-        j = int(2 * (i - start))
-
-        if blocks[i] == DIRECT:
-            output[j] = values[j]
-            output[j + 1] = values[j + 1]
-        elif blocks[i] == INFERIOR:
-            output[j] = values[j + 1]
-            output[j + 1] = values[j + 1]
-        elif blocks[i] == INVERSE:
-            output[j] = values[j + 1]
-            output[j + 1] = values[j]
-        elif blocks[i] == SUPERIOR:
-            output[j] = values[j]
-            output[j + 1] = values[j]
-
-    return output
-
-
-def shuffle(index, input_level_index):
-    """
-        - computes `rank` of Benes subnetwork (Benes network consists in multiple merged subnetworks)
-        (`rank` = number of inputs for subnetwork)
-            - if `input_level_index` == 0 -> return `i`
-            - if `input_level_index` <= `middle_level_index` -> [`rank` = `N` / (2 ^ (`input_level_index` - 1))]
-            - if `input_level_index` > `middle_level_index` -> [`rank` = `N` / (2 ^ `nr_of_levels` - `input_level_index` - 1)]
-        - computes index of block where `i` is, `src_block_index`
-            - src_block_index = int(i / 2) + 1
-        - computes destination bloc, based on `rank`, `src_block_index` and `i`
-            - i % 2 == 1:
-                - TODO `dst_block_index`
-                `dst_block_index` = upper(`src_block_index` / 2)
-            - i % 2 == 0:
-                - TODO `dst_block_index`
-                `dst_block_index` = upper(`src_block_index` / 2) + `rank`/2
-        - returns index of input from destination block, `shuffled`
-            - `dst_block_index` % 2 == 1 -> 1
-            - `dst_block_index` % 2 == 0 -> 2
-
-    """
-
-    return 0
-
-
 def print_output(INPUT, OUTPUT, steps, nr_of_rows, nr_of_blocks):
     """
     :param INPUT: input values
@@ -135,6 +68,82 @@ def print_output(INPUT, OUTPUT, steps, nr_of_rows, nr_of_blocks):
         print("{}: {}".format(str(step).ljust(col_width), str(steps[step]).ljust(col_width)))
 
 
+def generate_all_posibilities():
+    """
+    Generates all possible block types variations
+    :param nr_of_blocks: the total number of blocks in the network
+    :return: generated possibilities
+    """
+    blocks = [BLOCK_TYPES] * nr_of_blocks
+    product = itertools.product(*blocks)
+
+    return product
+
+
+def go_through_level(start, values, blocks):
+    """
+    Simulates the shuffled input going through a level
+    :param start: index or first block from level
+    :param values: shuffled values
+    :param blocks: all blocks
+    :return: input processed through level
+    """
+    output = [0] * N
+
+    for i in range(int(start), int(start + (N / 2))):
+        j = int(2 * (i - start))
+
+        if blocks[i] == DIRECT:
+            output[j] = values[j]
+            output[j + 1] = values[j + 1]
+        elif blocks[i] == INFERIOR:
+            output[j] = values[j + 1]
+            output[j + 1] = values[j + 1]
+        elif blocks[i] == INVERSE:
+            output[j] = values[j + 1]
+            output[j + 1] = values[j]
+        elif blocks[i] == SUPERIOR:
+            output[j] = values[j]
+            output[j + 1] = values[j]
+
+    return output
+
+
+def shuffle(index, input_level_index):
+    """
+    Simulates a shuffle between levels.
+    param index: index of input in a level (from 0 to N-1)
+    param input_level_index: the level before which the shuffle is made - the shuffled index goes into that level input
+    :return: shuffled_index: the position after shuffle
+    """
+
+    if input_level_index == 0:
+        return index
+
+    elif input_level_index > middle_level_index:
+        for i in range(N):
+            if shuffle(i, nr_of_levels - input_level_index) == index:
+                return i
+
+    elif input_level_index <= middle_level_index:
+        rank = int(N / (2 ** (input_level_index - 1)))
+        src_block_index = int(index / 2)
+
+        if index % 2 == 1:
+            dst_block_index = int(src_block_index / 2)
+        else:
+            dst_block_index = int(src_block_index / 2) + int(rank / 4)
+
+        if src_block_index % 2 == 0:
+            shuffled_index = (dst_block_index) * 2
+        else:
+            shuffled_index = (dst_block_index) * 2 + 1
+
+        return shuffled_index
+
+    raise Exception("Error at shuffle!")
+
+
 def check_possibility(INPUT, OUTPUT, possibilities, start, end):
     global result
 
@@ -155,7 +164,7 @@ def check_possibility(INPUT, OUTPUT, possibilities, start, end):
         for level in range(nr_of_levels):
             # before level
             for i in range(N):
-                shuffled_position = shuffle(i, level)     # aici trb modificat - shuffle in functie de etaj si rand
+                shuffled_position = shuffle(i, level)
                 shuffled_values[shuffled_position] = input_values[i]
 
             # in level
@@ -227,16 +236,18 @@ def main():
 
     # Testing all possibilities
     nr_of_possibilities = len(BLOCK_TYPES) ** nr_of_blocks
-    threads = []
-    for thread in range(THREADS):
-        start = int(nr_of_possibilities / THREADS * len(threads))
-        end = int(nr_of_possibilities / THREADS * (len(threads) + 1))
-        threads.append(threading.Thread(target=check_possibility, args=(INPUT, OUTPUT, possibilities, start, end)))
+    # threads = []
+    # for thread in range(THREADS):
+    #     start = int(nr_of_possibilities / THREADS * len(threads))
+    #     end = int(nr_of_possibilities / THREADS * (len(threads) + 1))
+    #     threads.append(threading.Thread(target=check_possibility, args=(INPUT, OUTPUT, possibilities, start, end)))
+    #
+    # for thread in threads:
+    #     thread.start()
+    # for thread in threads:
+    #     thread.join()
 
-    for thread in threads:
-        thread.start()
-    for thread in threads:
-        thread.join()
+    check_possibility(INPUT, OUTPUT, possibilities, 0, nr_of_possibilities)
 
     if result is None:
         print("There is no Omega network of size {0}x{0} that can convert {1} to {2}!".format(N, INPUT, OUTPUT))
