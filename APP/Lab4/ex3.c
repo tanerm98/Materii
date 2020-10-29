@@ -12,6 +12,7 @@ int main (int argc, char **argv) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &proc);
 
+	// only works for SIZE % proc == 0
     int chunk = SIZE / proc;
     int start = rank * chunk;
     int stop = (rank + 1) * chunk;
@@ -82,11 +83,6 @@ int main (int argc, char **argv) {
         	/* communicator = */ MPI_COMM_WORLD,
         	/* status       = */ MPI_STATUS_IGNORE
         );
-
-		// only works for SIZE % proc == 0
-        int chunk = SIZE / proc;
-        int start = rank * chunk;
-        int stop = (rank + 1) * chunk;
 
         for (int i = start; i < stop; i++) {
             part_sum += v[i];

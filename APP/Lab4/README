@@ -28,3 +28,7 @@ ex2:
 ex3:
 	- mpicc -o ex3 ex3.c
 	- mpirun -np 4 ./ex3
+
+bonus:
+	- mpicc -o bonus bonus.c
+	- mpirun -np 4 ./bonus
