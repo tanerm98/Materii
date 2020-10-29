@@ -1,0 +1,30 @@
+MPI_Send(
+	/* data         = */ data_to_send,
+	/* count        = */ 3,
+	/* datatype     = */ MPI_INT,
+	/* destination  = */ i,
+	/* tag          = */ 0,
+	/* communicator = */ MPI_COMM_WORLD
+);
+
+MPI_Recv(
+	/* data         = */ &(filtered_image[j][0]),
+	/* count        = */ byte_width,
+	/* datatype     = */ MPI_INT,
+	/* source       = */ i,
+	/* tag          = */ 0,
+	/* communicator = */ MPI_COMM_WORLD,
+	/* status       = */ MPI_STATUS_IGNORE
+);
+
+ex1:
+	- mpicc -o ex1 ex1.c
+	- mpirun -np 4 ./ex1
+
+ex2:
+	- mpicc -o ex2 ex2.c
+	- mpirun -np 4 ./ex2
+
+ex3:
+	- mpicc -o ex3 ex3.c
+	- mpirun -np 4 ./ex3
