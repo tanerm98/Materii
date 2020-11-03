@@ -1,0 +1,9 @@
+Taner Mustafa - 341C1 - SM - Laborator 4 - Software - FIFO
+
+Program MPI:
+	- primeste ca input un string de maxim 10MB
+	- calculeaza pentru fiecare litera din alfabet A-Z, numarul de aparitii
+
+Run:
+	- mpicc -o ex ex.c
+	- mpirun -np 4 ./ex
