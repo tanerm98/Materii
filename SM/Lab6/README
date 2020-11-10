@@ -1,0 +1,11 @@
+Taner Mustafa - 341C1 - SM - Laborator 6 - Software - OpenMP
+
+Program care primeste un text ca input si calculeaza pentru fiecare litera din alfabet, numarul de aparitii.
+
+- Command to compile and run (cwd=`Lab6`):
+    ```
+        mkdir exec
+        cd exec
+        gcc-9 ../ex.c -o ex -fopenmp -fdump-tree-all
+        ./ex
+    ```
