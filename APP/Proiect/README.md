@@ -11,7 +11,7 @@
     trecerea prin etaj.
 
 * Echipa proiectului:
-    Deaconu Carina 341C1
+    Deaconu Andreea-Carina 341C1
     Ionita Mihai Sebastian 341C1
     Mustafa Taner 341C1
 
