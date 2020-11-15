@@ -14,6 +14,7 @@ struct statistics {
 
 struct package {
 	int id;
+	unsigned long token;
 	string message<>;
 	struct sensor_data data;
 	struct statistics stats;
@@ -21,6 +22,8 @@ struct package {
 
 program RPCDBPROG{
 	version RPCDBVERS{
+		package LOGIN(package) = 1;
+		package LOGOUT(package) = 1;
 		package ADD(package) = 1;
 		package UPDATE(package) = 1;
 		package DEL(package) = 1;
