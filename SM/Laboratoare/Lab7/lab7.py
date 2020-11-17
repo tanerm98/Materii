@@ -189,8 +189,8 @@ class MESI:
 
 
 def main():
-    nr_of_proc = 3
-    proc_actions = ["P1Rd", "P2Rd", "P3Rd", "P1Rd", "P1Wr", "P1Rd", "P2Wr", "P3Rd"]
+    nr_of_proc = 4
+    proc_actions = ["P1Rd", "P2Rd", "P3Rd", "P4Rd", "P1Rd", "P1Wr", "P1Rd", "P2Wr", "P3Rd", "P4Wr", "P4Rd", "P1Rd"]
 
     mesi = MESI(nr_of_proc=nr_of_proc, proc_actions=proc_actions)
     mesi.do_actions()
