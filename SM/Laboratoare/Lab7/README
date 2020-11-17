@@ -1,1 +1,7 @@
-0.5p
+Mustafa Taner - 341C1 - SM - Laborator 7 - MESI
+
+1p
+
+Rulare:
+ - pip install re
+ - python3 lab7.py
