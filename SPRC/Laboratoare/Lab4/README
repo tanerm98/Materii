@@ -1,0 +1,9 @@
+Taner Mustafa - 341C1 - SPRC - Laborator 4 - Docker
+
+Task1
+docker build . -t task1
+docker run -it -p 8080:80 task1
+
+Task2
+docker-compose up
+docker-compose down
