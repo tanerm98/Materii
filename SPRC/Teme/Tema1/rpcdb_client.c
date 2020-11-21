@@ -6,32 +6,72 @@
 
 #include "rpcdb.h"
 
+CLIENT *clnt;
+FILE *commannds_file = NULL;
 
-void rpcdbprog_1(char *host) {
-	CLIENT *clnt;
-	package  *result_1;
-	package  command_1_arg;
-
+void connect_to_server(char *host) {
 	clnt = clnt_create (host, RPCDBPROG, RPCDBVERS, "udp");
-	if (clnt == NULL) {
-		clnt_pcreateerror (host);
-		exit (1);
-	}
+    if (clnt == NULL) {
+        clnt_pcreateerror (host);
+        exit (1);
+    }
+}
 
-	command_1_arg.command = "";
-    command_1_arg.message = "";
-    static float values[MAXBUF];
-    command_1_arg.data.array.array_len = 0;
-    command_1_arg.data.array.array_val = values;
-
-	result_1 = command_1(&command_1_arg, clnt);
-	if (result_1 == (package *) NULL) {
-		clnt_perror (clnt, "call failed");
-	}
-
+void disconnect_from_server(char *host) {
 	clnt_destroy (clnt);
 }
 
+void get_commands_input(int argc, char *argv[]) {
+	printf("Getting commands input...\n");
+	if (argc == 3) {
+		printf("Getting commands from file '%s'...\n", argv[2]);
+        commannds_file = fopen (argv[2], "r");
+    } else {
+        printf("Getting commands from STDIN...\n");
+        commannds_file = stdin;
+    }
+
+	if (commannds_file == NULL) {
+        printf("[ERROR] Could not open commands input!\n");
+        exit(1);
+    }
+}
+
+void send_command_to_server(char *command_line) {
+	printf("Sending '%s' command to server...\n", command_line);
+
+	package  *result, command;
+
+//	initializing strings and arrays
+	command.command = command_line;
+    command.message = "";
+    static float values[MAXBUF];
+    command.data.array.array_len = 0;
+    command.data.array.array_val = values;
+
+	result = command_1(&command, clnt);
+	if (result == (package *) NULL) {
+		clnt_perror (clnt, "call failed");
+	}
+
+	printf("Received reponse from server: '%s'.\n", result->message);
+}
+
+void execute_commands() {
+	char line[MAXBUF], *command;
+
+	printf("Executing commands...\n");
+	while (fgets (line, MAXBUF, commannds_file) != NULL) {
+
+		command = strtok (line, "\n");
+		if (command == NULL) {
+			break;
+		}
+
+		printf("Received '%s' command request.\n", command);
+		send_command_to_server(command);
+    }
+}
 
 int main (int argc, char *argv[]) {
 	char *host;
@@ -42,7 +82,13 @@ int main (int argc, char *argv[]) {
 	}
 	host = argv[1];
 
-	rpcdbprog_1 (host);
+	connect_to_server(host);
+
+    get_commands_input(argc, argv);
+    execute_commands();
+    fclose(commannds_file);
+
+    disconnect_from_server(host);
 
 	exit (0);
 }

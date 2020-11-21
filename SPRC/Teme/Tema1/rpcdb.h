@@ -3,6 +3,10 @@
  * It was generated using rpcgen.
  */
 
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #ifndef _RPCDB_H_RPCGEN
 #define _RPCDB_H_RPCGEN
 
