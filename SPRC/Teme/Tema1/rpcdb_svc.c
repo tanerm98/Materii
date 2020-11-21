@@ -20,14 +20,7 @@ static void
 rpcdbprog_1(struct svc_req *rqstp, register SVCXPRT *transp)
 {
 	union {
-		package login_1_arg;
-		package logout_1_arg;
-		package add_1_arg;
-		package update_1_arg;
-		package del_1_arg;
-		package read_1_arg;
-		package get_stat_1_arg;
-		package get_stat_all_1_arg;
+		package command_1_arg;
 	} argument;
 	char *result;
 	xdrproc_t _xdr_argument, _xdr_result;
@@ -38,64 +31,10 @@ rpcdbprog_1(struct svc_req *rqstp, register SVCXPRT *transp)
 		(void) svc_sendreply (transp, (xdrproc_t) xdr_void, (char *)NULL);
 		return;
 
-	case LOGIN:
+	case COMMAND:
 		_xdr_argument = (xdrproc_t) xdr_package;
 		_xdr_result = (xdrproc_t) xdr_package;
-		local = (char *(*)(char *, struct svc_req *)) login_1_svc;
-		break;
-
-	case LOGOUT:
-		_xdr_argument = (xdrproc_t) xdr_package;
-		_xdr_result = (xdrproc_t) xdr_package;
-		local = (char *(*)(char *, struct svc_req *)) logout_1_svc;
-		break;
-
-	case ADD:
-		_xdr_argument = (xdrproc_t) xdr_package;
-		_xdr_result = (xdrproc_t) xdr_package;
-		local = (char *(*)(char *, struct svc_req *)) add_1_svc;
-		break;
-
-	case UPDATE:
-		_xdr_argument = (xdrproc_t) xdr_package;
-		_xdr_result = (xdrproc_t) xdr_package;
-		local = (char *(*)(char *, struct svc_req *)) update_1_svc;
-		break;
-
-	case DEL:
-		_xdr_argument = (xdrproc_t) xdr_package;
-		_xdr_result = (xdrproc_t) xdr_package;
-		local = (char *(*)(char *, struct svc_req *)) del_1_svc;
-		break;
-
-	case READ:
-		_xdr_argument = (xdrproc_t) xdr_package;
-		_xdr_result = (xdrproc_t) xdr_package;
-		local = (char *(*)(char *, struct svc_req *)) read_1_svc;
-		break;
-
-	case GET_STAT:
-		_xdr_argument = (xdrproc_t) xdr_package;
-		_xdr_result = (xdrproc_t) xdr_package;
-		local = (char *(*)(char *, struct svc_req *)) get_stat_1_svc;
-		break;
-
-	case GET_STAT_ALL:
-		_xdr_argument = (xdrproc_t) xdr_package;
-		_xdr_result = (xdrproc_t) xdr_package;
-		local = (char *(*)(char *, struct svc_req *)) get_stat_all_1_svc;
-		break;
-
-	case LOAD:
-		_xdr_argument = (xdrproc_t) xdr_void;
-		_xdr_result = (xdrproc_t) xdr_package;
-		local = (char *(*)(char *, struct svc_req *)) load_1_svc;
-		break;
-
-	case STORE:
-		_xdr_argument = (xdrproc_t) xdr_void;
-		_xdr_result = (xdrproc_t) xdr_package;
-		local = (char *(*)(char *, struct svc_req *)) store_1_svc;
+		local = (char *(*)(char *, struct svc_req *)) command_1_svc;
 		break;
 
 	default:

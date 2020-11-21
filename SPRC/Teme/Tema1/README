@@ -1,3 +1,5 @@
-Mustafa Taner - 341C1 - SPRC - Tema 1
+RPCDB - SPRC Tema 2 - Taner Mustafa - 341C1
 
-rpcgen -C -a rpcdb.x
+Warmup:     #exemplul din slide-uri
+	rpcgen -C -a rpcdb.x
+	make -f Makefile.rpcdb

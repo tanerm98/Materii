@@ -14,7 +14,8 @@ xdr_sensor_data (XDR *xdrs, sensor_data *objp)
 		 return FALSE;
 	 if (!xdr_int (xdrs, &objp->no_values))
 		 return FALSE;
-	 if (!xdr_pointer (xdrs, (char **)&objp->values, sizeof (float), (xdrproc_t) xdr_float))
+	 if (!xdr_array (xdrs, (char **)&objp->array.array_val, (u_int *) &objp->array.array_len, MAXBUF,
+		sizeof (float), (xdrproc_t) xdr_float))
 		 return FALSE;
 	return TRUE;
 }
@@ -81,7 +82,9 @@ xdr_package (XDR *xdrs, package *objp)
 
 	 if (!xdr_int (xdrs, &objp->id))
 		 return FALSE;
-	 if (!xdr_u_long (xdrs, &objp->token))
+	 if (!xdr_u_quad_t (xdrs, &objp->token))
+		 return FALSE;
+	 if (!xdr_string (xdrs, &objp->command, ~0))
 		 return FALSE;
 	 if (!xdr_string (xdrs, &objp->message, ~0))
 		 return FALSE;

@@ -13,11 +13,15 @@
 extern "C" {
 #endif
 
+#define MAXBUF 1000
 
 struct sensor_data {
 	int data_id;
 	int no_values;
-	float *values;
+	struct {
+		u_int array_len;
+		float *array_val;
+	} array;
 };
 typedef struct sensor_data sensor_data;
 
@@ -31,80 +35,27 @@ typedef struct statistics statistics;
 
 struct package {
 	int id;
-	u_long token;
+	u_quad_t token;
+	char *command;
 	char *message;
 	struct sensor_data data;
 	struct statistics stats;
 };
 typedef struct package package;
 
-#define RPCDBPROG 0x31234567
+#define RPCDBPROG 0x32345678
 #define RPCDBVERS 1
 
 #if defined(__STDC__) || defined(__cplusplus)
-#define LOGIN 1
-extern  package * login_1(package *, CLIENT *);
-extern  package * login_1_svc(package *, struct svc_req *);
-#define LOGOUT 2
-extern  package * logout_1(package *, CLIENT *);
-extern  package * logout_1_svc(package *, struct svc_req *);
-#define ADD 3
-extern  package * add_1(package *, CLIENT *);
-extern  package * add_1_svc(package *, struct svc_req *);
-#define UPDATE 4
-extern  package * update_1(package *, CLIENT *);
-extern  package * update_1_svc(package *, struct svc_req *);
-#define DEL 5
-extern  package * del_1(package *, CLIENT *);
-extern  package * del_1_svc(package *, struct svc_req *);
-#define READ 6
-extern  package * read_1(package *, CLIENT *);
-extern  package * read_1_svc(package *, struct svc_req *);
-#define GET_STAT 7
-extern  package * get_stat_1(package *, CLIENT *);
-extern  package * get_stat_1_svc(package *, struct svc_req *);
-#define GET_STAT_ALL 8
-extern  package * get_stat_all_1(package *, CLIENT *);
-extern  package * get_stat_all_1_svc(package *, struct svc_req *);
-#define LOAD 9
-extern  package * load_1(void *, CLIENT *);
-extern  package * load_1_svc(void *, struct svc_req *);
-#define STORE 10
-extern  package * store_1(void *, CLIENT *);
-extern  package * store_1_svc(void *, struct svc_req *);
+#define COMMAND 1
+extern  package * command_1(package *, CLIENT *);
+extern  package * command_1_svc(package *, struct svc_req *);
 extern int rpcdbprog_1_freeresult (SVCXPRT *, xdrproc_t, caddr_t);
 
 #else /* K&R C */
-#define LOGIN 1
-extern  package * login_1();
-extern  package * login_1_svc();
-#define LOGOUT 2
-extern  package * logout_1();
-extern  package * logout_1_svc();
-#define ADD 3
-extern  package * add_1();
-extern  package * add_1_svc();
-#define UPDATE 4
-extern  package * update_1();
-extern  package * update_1_svc();
-#define DEL 5
-extern  package * del_1();
-extern  package * del_1_svc();
-#define READ 6
-extern  package * read_1();
-extern  package * read_1_svc();
-#define GET_STAT 7
-extern  package * get_stat_1();
-extern  package * get_stat_1_svc();
-#define GET_STAT_ALL 8
-extern  package * get_stat_all_1();
-extern  package * get_stat_all_1_svc();
-#define LOAD 9
-extern  package * load_1();
-extern  package * load_1_svc();
-#define STORE 10
-extern  package * store_1();
-extern  package * store_1_svc();
+#define COMMAND 1
+extern  package * command_1();
+extern  package * command_1_svc();
 extern int rpcdbprog_1_freeresult ();
 #endif /* K&R C */
 
