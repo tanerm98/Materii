@@ -8,11 +8,12 @@
 
 CLIENT *clnt;
 FILE *commannds_file = NULL;
+unsigned long token = REJECTED_TOKEN;
 
 void connect_to_server(char *host) {
-	clnt = clnt_create (host, RPCDBPROG, RPCDBVERS, "udp");
+	clnt = clnt_create(host, RPCDBPROG, RPCDBVERS, "udp");
     if (clnt == NULL) {
-        clnt_pcreateerror (host);
+        clnt_pcreateerror(host);
         exit (1);
     }
 }
@@ -25,7 +26,7 @@ void get_commands_input(int argc, char *argv[]) {
 	printf("Getting commands input...\n");
 	if (argc == 3) {
 		printf("Getting commands from file '%s'...\n", argv[2]);
-        commannds_file = fopen (argv[2], "r");
+        commannds_file = fopen(argv[2], "r");
     } else {
         printf("Getting commands from STDIN...\n");
         commannds_file = stdin;
@@ -40,19 +41,23 @@ void get_commands_input(int argc, char *argv[]) {
 void send_command_to_server(char *command_line) {
 	printf("Sending '%s' command to server...\n", command_line);
 
-	package  *result, command;
+	package *result, command;
 
 //	initializing strings and arrays
 	command.command = command_line;
     command.message = "";
-    static float values[MAXBUF];
+    static float values[0];
     command.data.array.array_len = 0;
     command.data.array.array_val = values;
+
+    command.token = token;
 
 	result = command_1(&command, clnt);
 	if (result == (package *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
+
+	token = result->token;
 
 	printf("Received reponse from server: '%s'.\n", result->message);
 }

@@ -7,6 +7,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define LOGIN_COMMAND "login"
+#define LOGOUT_COMMAND "logout"
+#define ADD_COMMAND "add"
+#define DEL_COMMAND "del"
+#define UPDATE_COMMAND "update"
+#define READ_COMMAND "read"
+#define GET_STAT_COMMAND "get_stat"
+#define GET_STAT_ALL_COMMAND "get_stat_all"
+#define STORE_COMMAND "store"
+#define LOAD_COMMAND "load"
+
+#define REJECTED_TOKEN -1
+
 #ifndef _RPCDB_H_RPCGEN
 #define _RPCDB_H_RPCGEN
 
@@ -46,6 +59,28 @@ struct package {
 	struct statistics stats;
 };
 typedef struct package package;
+
+// data kept in server  ////////////////////////////
+struct memory_database {
+	struct sensor_data data;
+	struct memory_database *next;
+};
+typedef struct memory_database memory_database;
+
+struct user_data {
+	char* user_name;
+	u_quad_t token;
+	struct memory_database mem_database;
+	FILE* disk_database;
+};
+typedef struct user_data user_data;
+
+struct users {
+	struct user_data user;
+	struct users *next;
+};
+typedef struct users users;
+////////////////////////////////////////////////////////
 
 #define RPCDBPROG 0x32345678
 #define RPCDBVERS 1

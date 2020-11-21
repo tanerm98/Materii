@@ -5,15 +5,44 @@
  */
 
 #include "rpcdb.h"
+users *usrs = NULL;
 
 package* command_1_svc(package *argp, struct svc_req *rqstp) {
 	static package  result;
 
+    printf("Received command '%s'.\n", argp->command);
+
+	char *command = argp->command;
+	if (strstr(command, LOGIN_COMMAND) != NULL) {
+		printf("%s\n", LOGIN_COMMAND);
+    } else if (strstr(command, LOGOUT_COMMAND) != NULL) {
+        printf("%s\n", LOGOUT_COMMAND);
+    } else if (strstr(command, ADD_COMMAND) != NULL) {
+        printf("%s\n", ADD_COMMAND);
+    } else if (strstr(command, DEL_COMMAND) != NULL) {
+        printf("%s\n", DEL_COMMAND);
+    } else if (strstr(command, UPDATE_COMMAND) != NULL) {
+        printf("%s\n", UPDATE_COMMAND);
+    } else if (strstr(command, READ_COMMAND) != NULL) {
+        printf("%s\n", READ_COMMAND);
+    } else if (strstr(command, GET_STAT_COMMAND) != NULL) {
+        printf("%s\n", GET_STAT_COMMAND);
+    } else if (strstr(command, GET_STAT_ALL_COMMAND) != NULL) {
+        printf("%s\n", GET_STAT_ALL_COMMAND);
+    } else if (strstr(command, STORE_COMMAND) != NULL) {
+        printf("%s\n", STORE_COMMAND);
+    } else if (strstr(command, LOAD_COMMAND) != NULL) {
+        printf("%s\n", LOAD_COMMAND);
+    } else {
+        printf("kkt\n");
+    }
+
 	result.command = "";
-    result.message = "";
-    static float values[MAXBUF];
+    result.message = "Dada";
+    static float values[0];
 	result.data.array.array_len = 0;
     result.data.array.array_val = values;
+
 
 	return &result;
 }
