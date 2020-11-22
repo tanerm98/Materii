@@ -116,6 +116,7 @@ void logout(package *argp, package *result) {
     if (user == NULL) {
         result->message = "[ERROR-4] Logout failed! No users logged in or the client is not logged in!";
         printf("%s\n", result->message);
+        return;
 
     } else {
         printf("Logging out user '%s'...\n", user->user_name);
@@ -140,15 +141,65 @@ void add(package *argp, package *result) {
     if (user == NULL) {
         result->message = "[ERROR-5] Adding data failed! Invalid token!";
         printf("%s\n", result->message);
+        return;
 
     } else {
-        printf("Logging out user '%s'...\n", user->user_name);
-        user->token = REJECTED_TOKEN;
+        printf("Adding data for user '%s'...\n", user->user_name);
 
-        free_memory_database(user->mem_database);
+		char* add;
+		int data_id = BLANK;
+        int no_values = BLANK;
+
+        char *command = (char*) calloc (MAXBUF, sizeof(char));
+        strcpy(command, argp->command);
+
+        char *string_value = strtok(command, " ");
+        if (string_value == NULL) {
+            result->message = "[ERROR-6] Could not parse 'ADD' command!";
+            printf("%s\n", result->message);
+            return;
+        }
+
+		for (int i = 0; i < 2; i++) {
+			string_value = strtok(NULL, " ");
+			if (string_value == NULL) {
+                result->message = "[ERROR-7] Could not parse data ID and/or number of values!";
+                printf("%s\n", result->message);
+                return;
+
+            } else {
+                if (i == 0) {
+                    data_id = atoi(string_value);
+                } else {
+                    no_values = atoi(string_value);
+                    if (no_values < 0) {
+                        result->message = "[ERROR-8] Number of values must be greater than 0!";
+                        printf("%s\n", result->message);
+                        return;
+                    }
+                }
+            }
+		}
+		printf("Data ID: %d; Number of values: %d\nValues found: ", data_id, no_values);
+
+		float values[no_values];
+		for (int i = 0; i < no_values; i++) {
+            string_value = strtok(NULL, " ");
+            if (string_value == NULL) {
+                result->message = "[ERROR-9] Could not parse all values!";
+                printf("%s\n", result->message);
+                return;
+
+            } else {
+                values[i] = atof(string_value);
+                printf("%.2f; ", values[i]);
+            }
+        }
+        printf("\n");
+
         user->mem_database = NULL;
 
-        result->message = "[SUCCESSFUL-3] Logout successful!";
+        result->message = "[SUCCESSFUL-4] Adding data successful!";
         printf("%s\n", result->message);
         return;
     }
@@ -171,7 +222,7 @@ package* command_1_svc(package *argp, struct svc_req *rqstp) {
     } else if (strstr(command, LOGOUT_COMMAND) == command) {
         logout(argp, &result);
     } else if (strstr(command, ADD_COMMAND) == command) {
-        printf("%s\n", ADD_COMMAND);
+        add(argp, &result);
     } else if (strstr(command, DEL_COMMAND) == command) {
         printf("%s\n", DEL_COMMAND);
     } else if (strstr(command, UPDATE_COMMAND) == command) {

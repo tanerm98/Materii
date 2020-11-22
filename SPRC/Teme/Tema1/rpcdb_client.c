@@ -75,7 +75,6 @@ void execute_commands() {
 			break;
 		}
 
-		printf("Received '%s' command request.\n", command);
 		send_command_to_server(command);
     }
 }
