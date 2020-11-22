@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
 
 #define LOGIN_COMMAND "login"
 #define LOGOUT_COMMAND "logout"
@@ -70,7 +71,7 @@ typedef struct memory_database memory_database;
 struct user_data {
 	char* user_name;
 	u_quad_t token;
-	struct memory_database mem_database;
+	struct memory_database *mem_database;
 	FILE* disk_database;
 };
 typedef struct user_data user_data;

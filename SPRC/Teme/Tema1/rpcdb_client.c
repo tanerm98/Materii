@@ -33,7 +33,7 @@ void get_commands_input(int argc, char *argv[]) {
     }
 
 	if (commannds_file == NULL) {
-        printf("[ERROR] Could not open commands input!\n");
+        printf("[ERROR-1] Could not open commands input!\n");
         exit(1);
     }
 }
@@ -43,7 +43,7 @@ void send_command_to_server(char *command_line) {
 
 	package *result, command;
 
-//	initializing strings and arrays
+	// initializing strings and arrays
 	command.command = command_line;
     command.message = "";
     static float values[0];
