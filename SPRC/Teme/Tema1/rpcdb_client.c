@@ -57,9 +57,9 @@ void send_command_to_server(char *command_line) {
 		clnt_perror (clnt, "call failed");
 	}
 
-	if (result->token != REJECTED_TOKEN) {
-		token = result->token;
-	}
+	if ((strstr(command_line, LOGIN_COMMAND) == command_line) && (result->token != REJECTED_TOKEN)) {
+        token = result->token;
+    }
 
 	printf("Received reponse from server: '%s'.\n", result->message);
 }

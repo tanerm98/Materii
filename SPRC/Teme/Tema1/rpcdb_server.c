@@ -5,8 +5,8 @@
  */
 
 #include "rpcdb.h"
+
 users *userss = NULL;
-users *iterator, *previous, *temp;
 
 void free_memory_database(memory_database *list) {
 	printf("Freeing memory database for logged out user...\n");
@@ -19,14 +19,33 @@ void free_memory_database(memory_database *list) {
 	}
 }
 
+user_data* check_if_token_valid(u_quad_t token) {
+	users *iterator;
+
+	if (token != REJECTED_TOKEN) {
+		iterator = userss;
+    	while (iterator != NULL) {
+            if (iterator->user.token == token) {
+                return &(iterator->user);
+            }
+            iterator = iterator->next;
+        }
+	}
+
+    return NULL;
+}
+
 void login(package *argp, char *command, package *result) {
+	users *iterator, *previous, *new_user;
+
+    printf("Received `LOGIN` command.\n");
+
 	char *user_name = strtok(command, " ");
 	if (user_name == NULL) {
 		result->message = "[ERROR-1] Could not parse user name for login command!";
 		printf("%s\n", result->message);
 		return;
 	}
-
 	user_name = strtok(NULL, " \n");
 	if (user_name == NULL) {
 		result->message = "[ERROR-2] Could not parse user name for login command!";
@@ -37,22 +56,7 @@ void login(package *argp, char *command, package *result) {
     printf("Logging in user '%s'...\n", user_name);
     if (userss == NULL) {
         userss = (users*) calloc (1, sizeof(users));
-
-        userss->next = NULL;
-
-        userss->user.disk_database = NULL;
-        userss->user.mem_database = NULL;
-
-        userss->user.user_name = (char*) calloc (MAXBUF, sizeof(char));
-        strcpy(userss->user.user_name, user_name);
-
-		userss->user.token = rand();
-        userss->user.token = (userss->user.token << 32) | rand();
-
-        result->message = "[SUCCESSFUL-1] Login succesful!";
-        result->token = userss->user.token;
-
-        printf("%s\n", result->message);
+        new_user = userss;
 
     } else {
         iterator = userss;
@@ -64,7 +68,7 @@ void login(package *argp, char *command, package *result) {
                     iterator->user.token = rand();
                     iterator->user.token = (iterator->user.token << 32) | rand();
 
-                    result->message = "[SUCCESSFUL-2] Welcome back! (Re)Login succesful!";
+                    result->message = "[SUCCESSFUL-1] Welcome back! (Re)Login succesful!";
                     result->token = iterator->user.token;
 
                 } else {
@@ -80,56 +84,73 @@ void login(package *argp, char *command, package *result) {
 			iterator = previous->next;
         }
 
-		temp = (users*) calloc (1, sizeof(users));
-		previous->next = temp;
-
-        temp->next = NULL;
-
-        temp->user.disk_database = NULL;
-        temp->user.mem_database = NULL;
-
-        temp->user.user_name = (char*) calloc (MAXBUF, sizeof(char));
-        strcpy(temp->user.user_name, user_name);
-
-        temp->user.token = rand();
-        temp->user.token = (temp->user.token << 32) | rand();
-
-        result->message = "[SUCCESSFUL-3] Login succesful!";
-        printf("%s\n", result->message);
-        result->token = temp->user.token;
+		new_user = (users*) calloc (1, sizeof(users));
+		previous->next = new_user;
     }
+
+    new_user->next = NULL;
+
+    new_user->user.disk_database = NULL;
+    new_user->user.mem_database = NULL;
+
+    new_user->user.user_name = (char*) calloc (MAXBUF, sizeof(char));
+    strcpy(new_user->user.user_name, user_name);
+
+    new_user->user.token = rand();
+    new_user->user.token = (new_user->user.token << 32) | rand();
+
+    result->message = "[SUCCESSFUL-2] Login succesful!";
+    result->token = new_user->user.token;
+
+    printf("%s\n", result->message);
+
 }
 
 void logout(package *argp, package *result) {
-    printf("Received logout command.\n");
+	users *iterator;
 
-    if ((argp->token == REJECTED_TOKEN) || (userss == NULL)) {
+    printf("Received `LOGOUT` command.\n");
+
+    user_data *user = check_if_token_valid(argp->token);
+
+    if (user == NULL) {
         result->message = "[ERROR-4] Logout failed! No users logged in or the client is not logged in!";
-        result->token = REJECTED_TOKEN;
         printf("%s\n", result->message);
 
     } else {
-        iterator = userss;
-        while (iterator != NULL) {
-            if (iterator->user.token == argp->token) {
-                printf("Logging out user '%s'...\n", iterator->user.user_name);
-                iterator->user.token = REJECTED_TOKEN;
+        printf("Logging out user '%s'...\n", user->user_name);
+        user->token = REJECTED_TOKEN;
 
-				free_memory_database(iterator->user.mem_database);
-                iterator->user.mem_database = NULL;
+		free_memory_database(user->mem_database);
+        user->mem_database = NULL;
 
-	            result->message = "[SUCCESSFUL-4] Logout successful!";
-	            result->token = REJECTED_TOKEN;
-                printf("%s\n", result->message);
-                return;
-            }
-
-			iterator = iterator->next;
-        }
-
-		result->message = "[ERROR-5] Logout failed! Client is not logged in!";
-        result->token = REJECTED_TOKEN;
+        result->message = "[SUCCESSFUL-3] Logout successful!";
         printf("%s\n", result->message);
+        return;
+    }
+}
+
+void add(package *argp, package *result) {
+	users *iterator;
+
+    printf("Received 'ADD' command.\n");
+
+    user_data *user = check_if_token_valid(argp->token);
+
+    if (user == NULL) {
+        result->message = "[ERROR-5] Adding data failed! Invalid token!";
+        printf("%s\n", result->message);
+
+    } else {
+        printf("Logging out user '%s'...\n", user->user_name);
+        user->token = REJECTED_TOKEN;
+
+        free_memory_database(user->mem_database);
+        user->mem_database = NULL;
+
+        result->message = "[SUCCESSFUL-3] Logout successful!";
+        printf("%s\n", result->message);
+        return;
     }
 }
 
