@@ -35,6 +35,42 @@ user_data* check_if_token_valid(u_quad_t token) {
     return NULL;
 }
 
+int add_to_database(user_data *user, int data_id, int no_values, float *values) {
+	memory_database *new_data, *iterator, *previous;
+
+	if (user->mem_database == NULL) {
+		user->mem_database = (memory_database*) calloc (1, sizeof(memory_database));
+        new_data = user->mem_database;
+
+	} else {
+		iterator = user->mem_database;
+        while (iterator != NULL) {
+            if (iterator->data.data_id == data_id) {
+                return 0;
+            }
+            previous = iterator;
+            iterator = previous->next;
+        }
+
+        new_data = (memory_database*) calloc (1, sizeof(memory_database));
+        previous->next = new_data;
+	}
+
+	new_data->next = NULL;
+
+	new_data->data.data_id = data_id;
+	new_data->data.no_values = no_values;
+
+	static float static_values[MAXBUF];
+	for (int i = 0; i < no_values; i++) {
+		static_values[i] = values[i];
+	}
+	new_data->data.array.array_len = no_values;
+	new_data->data.array.array_val = static_values;
+
+	return 1;
+}
+
 void login(package *argp, char *command, package *result) {
 	users *iterator, *previous, *new_user;
 
@@ -180,7 +216,7 @@ void add(package *argp, package *result) {
                 }
             }
 		}
-		printf("Data ID: %d; Number of values: %d\nValues found: ", data_id, no_values);
+		printf("Data ID: %d; Number of values: %d; Values found: ", data_id, no_values);
 
 		float values[no_values];
 		for (int i = 0; i < no_values; i++) {
@@ -197,9 +233,13 @@ void add(package *argp, package *result) {
         }
         printf("\n");
 
-        user->mem_database = NULL;
+        int successful = add_to_database(user, data_id, no_values, values);
+        if (!successful) {
+            result->message = "[ERROR-10] Data ID already exists in database. Try 'UPDATE' command or different ID!";
+        } else {
+            result->message = "[SUCCESSFUL-4] Adding data successful!";
+        }
 
-        result->message = "[SUCCESSFUL-4] Adding data successful!";
         printf("%s\n", result->message);
         return;
     }
