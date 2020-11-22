@@ -44,8 +44,12 @@ void send_command_to_server(char *command_line) {
 	package *result, command;
 
 	// initializing strings and arrays
-	command.command = command_line;
-    command.message = "";
+    command.command = command_line;
+    command.message = EMPTY;
+
+    command.data.data_id = BLANK;
+    command.data.no_values = BLANK;
+
     static float values[0];
     command.data.array.array_len = 0;
     command.data.array.array_val = values;

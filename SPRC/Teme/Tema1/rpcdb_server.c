@@ -9,7 +9,7 @@
 users *userss = NULL;
 
 void free_memory_database(memory_database *list) {
-	printf("Freeing memory database for logged out user...\n");
+	printf("[INFO] Freeing memory database for logged out user...\n");
 	memory_database *pointer;
 
 	while(list != NULL) {
@@ -33,6 +33,28 @@ user_data* check_if_token_valid(u_quad_t token) {
 	}
 
     return NULL;
+}
+
+void read_from_database(user_data *user) {
+	printf("[INFO] Showing current database for user '%s'...\n", user->user_name);
+	memory_database *iterator;
+
+	iterator = user->mem_database;
+    while (iterator != NULL) {
+
+        printf("ID: %d; NO: %d;\n", iterator->data.data_id, iterator->data.no_values);
+
+		if (iterator->data.array.array_len > 0) {
+			printf("Values: ");
+			for (int i = 0; i < iterator->data.array.array_len; i++) {
+                printf("%f; ", iterator->data.array.array_val[i]);
+            }
+            printf("\n");
+		}
+
+        iterator = iterator->next;
+    }
+
 }
 
 int add_to_database(user_data *user, int data_id, int no_values, float *values) {
@@ -74,22 +96,22 @@ int add_to_database(user_data *user, int data_id, int no_values, float *values) 
 void login(package *argp, char *command, package *result) {
 	users *iterator, *previous, *new_user;
 
-    printf("Received `LOGIN` command.\n");
+    printf("[INFO] Interpreting `LOGIN` command.\n");
 
 	char *user_name = strtok(command, " ");
 	if (user_name == NULL) {
-		result->message = "[ERROR-1] Could not parse user name for login command!";
+		result->message = "[ERROR] Could not parse user name for login command!";
 		printf("%s\n", result->message);
 		return;
 	}
 	user_name = strtok(NULL, " \n");
 	if (user_name == NULL) {
-		result->message = "[ERROR-2] Could not parse user name for login command!";
+		result->message = "[ERROR] Could not parse user name for login command!";
         printf("%s\n", result->message);
         return;
     }
 
-    printf("Logging in user '%s'...\n", user_name);
+    printf("[INFO] Logging in user '%s'...\n", user_name);
     if (userss == NULL) {
         userss = (users*) calloc (1, sizeof(users));
         new_user = userss;
@@ -104,11 +126,11 @@ void login(package *argp, char *command, package *result) {
                     iterator->user.token = rand();
                     iterator->user.token = (iterator->user.token << 32) | rand();
 
-                    result->message = "[SUCCESSFUL-1] Welcome back! (Re)Login succesful!";
+                    result->message = "[SUCCESSFUL] Welcome back! (Re)Login succesful!";
                     result->token = iterator->user.token;
 
                 } else {
-                    result->message = "[ERROR-3] Login error! User already authenticated!";
+                    result->message = "[ERROR] Login error! User already authenticated!";
                     result->token = REJECTED_TOKEN;
                 }
 
@@ -135,7 +157,7 @@ void login(package *argp, char *command, package *result) {
     new_user->user.token = rand();
     new_user->user.token = (new_user->user.token << 32) | rand();
 
-    result->message = "[SUCCESSFUL-2] Login succesful!";
+    result->message = "[SUCCESSFUL] Login succesful!";
     result->token = new_user->user.token;
 
     printf("%s\n", result->message);
@@ -145,23 +167,23 @@ void login(package *argp, char *command, package *result) {
 void logout(package *argp, package *result) {
 	users *iterator;
 
-    printf("Received `LOGOUT` command.\n");
+    printf("[INFO] Interpreting `LOGOUT` command.\n");
 
     user_data *user = check_if_token_valid(argp->token);
 
     if (user == NULL) {
-        result->message = "[ERROR-4] Logout failed! No users logged in or the client is not logged in!";
+        result->message = "[ERROR] Logout failed! No users logged in or the client is not logged in!";
         printf("%s\n", result->message);
         return;
 
     } else {
-        printf("Logging out user '%s'...\n", user->user_name);
+        printf("[INFO] Logging out user '%s'...\n", user->user_name);
         user->token = REJECTED_TOKEN;
 
 		free_memory_database(user->mem_database);
         user->mem_database = NULL;
 
-        result->message = "[SUCCESSFUL-3] Logout successful!";
+        result->message = "[SUCCESSFUL] Logout successful!";
         printf("%s\n", result->message);
         return;
     }
@@ -170,17 +192,17 @@ void logout(package *argp, package *result) {
 void add(package *argp, package *result) {
 	users *iterator;
 
-    printf("Received 'ADD' command.\n");
+    printf("[INFO] Interpreting 'ADD' command.\n");
 
     user_data *user = check_if_token_valid(argp->token);
 
     if (user == NULL) {
-        result->message = "[ERROR-5] Adding data failed! Invalid token!";
+        result->message = "[ERROR] Adding data failed! Invalid token!";
         printf("%s\n", result->message);
         return;
 
     } else {
-        printf("Adding data for user '%s'...\n", user->user_name);
+        printf("[INFO] Adding data for user '%s'...\n", user->user_name);
 
 		char* add;
 		int data_id = BLANK;
@@ -191,7 +213,7 @@ void add(package *argp, package *result) {
 
         char *string_value = strtok(command, " ");
         if (string_value == NULL) {
-            result->message = "[ERROR-6] Could not parse 'ADD' command!";
+            result->message = "[ERROR] Could not parse 'ADD' command!";
             printf("%s\n", result->message);
             return;
         }
@@ -199,7 +221,7 @@ void add(package *argp, package *result) {
 		for (int i = 0; i < 2; i++) {
 			string_value = strtok(NULL, " ");
 			if (string_value == NULL) {
-                result->message = "[ERROR-7] Could not parse data ID and/or number of values!";
+                result->message = "[ERROR] Could not parse data ID and/or number of values!";
                 printf("%s\n", result->message);
                 return;
 
@@ -209,20 +231,20 @@ void add(package *argp, package *result) {
                 } else {
                     no_values = atoi(string_value);
                     if (no_values < 0) {
-                        result->message = "[ERROR-8] Number of values must be greater than 0!";
+                        result->message = "[ERROR] Number of values must be greater than 0!";
                         printf("%s\n", result->message);
                         return;
                     }
                 }
             }
 		}
-		printf("Data ID: %d; Number of values: %d; Values found: ", data_id, no_values);
+		printf("[INFO] Data ID: %d; Number of values: %d; Values found: ", data_id, no_values);
 
 		float values[no_values];
 		for (int i = 0; i < no_values; i++) {
             string_value = strtok(NULL, " ");
             if (string_value == NULL) {
-                result->message = "[ERROR-9] Could not parse all values!";
+                result->message = "[ERROR] Could not parse all values!";
                 printf("%s\n", result->message);
                 return;
 
@@ -235,12 +257,14 @@ void add(package *argp, package *result) {
 
         int successful = add_to_database(user, data_id, no_values, values);
         if (!successful) {
-            result->message = "[ERROR-10] Data ID already exists in database. Try 'UPDATE' command or different ID!";
+            result->message = "[ERROR] Data ID already exists in database. Try 'UPDATE' command or different ID!";
         } else {
-            result->message = "[SUCCESSFUL-4] Adding data successful!";
+            result->message = "[SUCCESSFUL] Adding data successful!";
         }
 
         printf("%s\n", result->message);
+        read_from_database(user);
+
         return;
     }
 }
@@ -248,13 +272,17 @@ void add(package *argp, package *result) {
 package* command_1_svc(package *argp, struct svc_req *rqstp) {
 	static package result;
 
-	result.command = "";
-    result.message = "";
+	result.command = EMPTY;
+    result.message = EMPTY;
+
+    result.data.data_id = BLANK;
+    result.data.no_values = BLANK;
+
     static float values[0];
     result.data.array.array_len = 0;
     result.data.array.array_val = values;
 
-    printf("Received command '%s'.\n", argp->command);
+    printf("[INFO] Received command '%s'.\n", argp->command);
 
 	char *command = argp->command;
 	if (strstr(command, LOGIN_COMMAND) == command) {
