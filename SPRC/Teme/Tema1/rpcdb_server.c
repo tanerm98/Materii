@@ -97,8 +97,8 @@ int update_database(user_data *user, int data_id, int no_values, float *values) 
 	memory_database *iterator;
 
 	if (user->mem_database != NULL) {
-
 		iterator = user->mem_database;
+
         while (iterator != NULL) {
             if (iterator->data.data_id == data_id) {
                 iterator->data.no_values = no_values;
@@ -113,6 +113,33 @@ int update_database(user_data *user, int data_id, int no_values, float *values) 
                 return 1;
             }
 
+            iterator = iterator->next;
+        }
+	}
+
+	return 0;
+}
+
+int delete_from_database(user_data *user, int data_id) {
+	memory_database *iterator, *previous;
+
+	if (user->mem_database != NULL) {
+		iterator = user->mem_database;
+
+        while (iterator != NULL) {
+            if (iterator->data.data_id == data_id) {
+                if (iterator == user->mem_database) {
+                    user->mem_database = user->mem_database->next;
+                } else {
+                    previous->next = iterator->next;
+                }
+
+                free(iterator);
+
+                return 1;
+            }
+
+			previous = iterator;
             iterator = iterator->next;
         }
 	}
@@ -298,7 +325,7 @@ void add(package *argp, package *result) {
 void update(package *argp, package *result) {
 	users *iterator;
 
-    printf("[INFO] Interpreting 'ADD' command.\n");
+    printf("[INFO] Interpreting 'UPDATE' command.\n");
 
     user_data *user = check_if_token_valid(argp->token);
 
@@ -374,6 +401,57 @@ void update(package *argp, package *result) {
     }
 }
 
+void del(package *argp, package *result) {
+	users *iterator;
+
+    printf("[INFO] Interpreting 'DEL' command.\n");
+
+    user_data *user = check_if_token_valid(argp->token);
+
+    if (user == NULL) {
+        result->message = "[ERROR] Deleting data failed! Invalid token!";
+        printf("%s\n", result->message);
+        return;
+
+    } else {
+        printf("[INFO] Deleting data for user '%s'...\n", user->user_name);
+
+		int data_id = BLANK;
+
+        char *command = (char*) calloc (MAXBUF, sizeof(char));
+        strcpy(command, argp->command);
+
+        char *string_value = strtok(command, " ");
+        if (string_value == NULL) {
+            result->message = "[ERROR] Could not parse 'DEL' command!";
+            printf("%s\n", result->message);
+            return;
+        }
+
+		string_value = strtok(NULL, " ");
+		if (string_value == NULL) {
+            result->message = "[ERROR] Could not parse data ID !";
+            printf("%s\n", result->message);
+            return;
+        } else {
+            data_id = atoi(string_value);
+        }
+		printf("[INFO] Data ID: %d;", data_id);
+
+        int successful = delete_from_database(user, data_id);
+        if (!successful) {
+            result->message = "[ERROR] Data ID does not exist in database.";
+        } else {
+            result->message = "[SUCCESSFUL] Deleting data successful!";
+        }
+
+        printf("%s\n", result->message);
+        read_from_database(user);
+
+        return;
+    }
+}
+
 
 package* command_1_svc(package *argp, struct svc_req *rqstp) {
 	static package result;
@@ -398,7 +476,7 @@ package* command_1_svc(package *argp, struct svc_req *rqstp) {
     } else if (strstr(command, ADD_COMMAND) == command) {
         add(argp, &result);
     } else if (strstr(command, DEL_COMMAND) == command) {
-        printf("%s\n", DEL_COMMAND);
+        del(argp, &result);
     } else if (strstr(command, UPDATE_COMMAND) == command) {
         update(argp, &result);
     } else if (strstr(command, READ_COMMAND) == command) {
