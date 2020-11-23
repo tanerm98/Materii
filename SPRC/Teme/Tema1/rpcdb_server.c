@@ -93,6 +93,33 @@ int add_to_database(user_data *user, int data_id, int no_values, float *values) 
 	return 1;
 }
 
+int update_database(user_data *user, int data_id, int no_values, float *values) {
+	memory_database *iterator;
+
+	if (user->mem_database != NULL) {
+
+		iterator = user->mem_database;
+        while (iterator != NULL) {
+            if (iterator->data.data_id == data_id) {
+                iterator->data.no_values = no_values;
+
+                static float static_values[MAXBUF];
+                for (int i = 0; i < no_values; i++) {
+                    static_values[i] = values[i];
+                }
+                iterator->data.array.array_len = no_values;
+                iterator->data.array.array_val = static_values;
+
+                return 1;
+            }
+
+            iterator = iterator->next;
+        }
+	}
+
+	return 0;
+}
+
 void login(package *argp, char *command, package *result) {
 	users *iterator, *previous, *new_user;
 
@@ -204,7 +231,6 @@ void add(package *argp, package *result) {
     } else {
         printf("[INFO] Adding data for user '%s'...\n", user->user_name);
 
-		char* add;
 		int data_id = BLANK;
         int no_values = BLANK;
 
@@ -269,6 +295,86 @@ void add(package *argp, package *result) {
     }
 }
 
+void update(package *argp, package *result) {
+	users *iterator;
+
+    printf("[INFO] Interpreting 'ADD' command.\n");
+
+    user_data *user = check_if_token_valid(argp->token);
+
+    if (user == NULL) {
+        result->message = "[ERROR] Updating data failed! Invalid token!";
+        printf("%s\n", result->message);
+        return;
+
+    } else {
+        printf("[INFO] Updating data for user '%s'...\n", user->user_name);
+
+		int data_id = BLANK;
+        int no_values = BLANK;
+
+        char *command = (char*) calloc (MAXBUF, sizeof(char));
+        strcpy(command, argp->command);
+
+        char *string_value = strtok(command, " ");
+        if (string_value == NULL) {
+            result->message = "[ERROR] Could not parse 'UPDATE' command!";
+            printf("%s\n", result->message);
+            return;
+        }
+
+		for (int i = 0; i < 2; i++) {
+			string_value = strtok(NULL, " ");
+			if (string_value == NULL) {
+                result->message = "[ERROR] Could not parse data ID and/or number of values!";
+                printf("%s\n", result->message);
+                return;
+
+            } else {
+                if (i == 0) {
+                    data_id = atoi(string_value);
+                } else {
+                    no_values = atoi(string_value);
+                    if (no_values < 0) {
+                        result->message = "[ERROR] Number of values must be greater than 0!";
+                        printf("%s\n", result->message);
+                        return;
+                    }
+                }
+            }
+		}
+		printf("[INFO] Data ID: %d; Number of values: %d; Values found: ", data_id, no_values);
+
+		float values[no_values];
+		for (int i = 0; i < no_values; i++) {
+            string_value = strtok(NULL, " ");
+            if (string_value == NULL) {
+                result->message = "[ERROR] Could not parse all values!";
+                printf("%s\n", result->message);
+                return;
+
+            } else {
+                values[i] = atof(string_value);
+                printf("%.2f; ", values[i]);
+            }
+        }
+        printf("\n");
+
+        int successful = update_database(user, data_id, no_values, values);
+        if (!successful) {
+            result->message = "[ERROR] Data ID does not exist in database. Try 'ADD' command!";
+        } else {
+            result->message = "[SUCCESSFUL] Updating data successful!";
+        }
+
+        printf("%s\n", result->message);
+        read_from_database(user);
+
+        return;
+    }
+}
+
+
 package* command_1_svc(package *argp, struct svc_req *rqstp) {
 	static package result;
 
@@ -294,7 +400,7 @@ package* command_1_svc(package *argp, struct svc_req *rqstp) {
     } else if (strstr(command, DEL_COMMAND) == command) {
         printf("%s\n", DEL_COMMAND);
     } else if (strstr(command, UPDATE_COMMAND) == command) {
-        printf("%s\n", UPDATE_COMMAND);
+        update(argp, &result);
     } else if (strstr(command, READ_COMMAND) == command) {
         printf("%s\n", READ_COMMAND);
     } else if (strstr(command, GET_STAT_COMMAND) == command) {
