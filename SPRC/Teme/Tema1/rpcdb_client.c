@@ -60,12 +60,24 @@ void send_command_to_server(char *command_line) {
 	if (result == (package *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
+	printf("Received reponse from server: '%s'.\n", result->message);
 
 	if ((strstr(command_line, LOGIN_COMMAND) == command_line) && (result->token != REJECTED_TOKEN)) {
         token = result->token;
-    }
+    } else if ((strstr(command_line, READ_COMMAND) == command_line) && (strstr(result->message, ERROR) == NULL)) {
+        sensor_data *data = &(result->data);
+        printf("[SUCCESSFUL] Received data:\n");
 
-	printf("Received reponse from server: '%s'.\n", result->message);
+        printf("ID: %d; NO: %d;\n", data->data_id, data->no_values);
+
+        if (data->no_values > 0) {
+            printf("Values: ");
+            for (int i = 0; i < data->array.array_len; i++) {
+                printf("%.2f; ", data->array.array_val[i]);
+            }
+            printf("\n");
+        }
+    }
 }
 
 void execute_commands() {

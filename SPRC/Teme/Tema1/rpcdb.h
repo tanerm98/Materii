@@ -22,6 +22,7 @@
 #define REJECTED_TOKEN -1
 #define BLANK -1
 #define EMPTY ""
+#define ERROR "ERROR"
 
 #ifndef _RPCDB_H_RPCGEN
 #define _RPCDB_H_RPCGEN

@@ -35,7 +35,7 @@ user_data* check_if_token_valid(u_quad_t token) {
     return NULL;
 }
 
-void read_from_database(user_data *user) {
+void print_database_for_user(user_data *user) {
 	printf("[INFO] Showing current database for user '%s'...\n", user->user_name);
 	memory_database *iterator;
 
@@ -47,7 +47,7 @@ void read_from_database(user_data *user) {
 		if (iterator->data.array.array_len > 0) {
 			printf("Values: ");
 			for (int i = 0; i < iterator->data.array.array_len; i++) {
-                printf("%f; ", iterator->data.array.array_val[i]);
+                printf("%.2f; ", iterator->data.array.array_val[i]);
             }
             printf("\n");
 		}
@@ -145,6 +145,24 @@ int delete_from_database(user_data *user, int data_id) {
 	}
 
 	return 0;
+}
+
+sensor_data* read_data(user_data *user, int data_id) {
+	memory_database *iterator;
+
+	if (user->mem_database != NULL) {
+		iterator = user->mem_database;
+
+        while (iterator != NULL) {
+            if (iterator->data.data_id == data_id) {
+                return &(iterator->data);
+            }
+
+            iterator = iterator->next;
+        }
+	}
+
+	return NULL;
 }
 
 void login(package *argp, char *command, package *result) {
@@ -308,6 +326,8 @@ void add(package *argp, package *result) {
         }
         printf("\n");
 
+        free(command);
+
         int successful = add_to_database(user, data_id, no_values, values);
         if (!successful) {
             result->message = "[ERROR] Data ID already exists in database. Try 'UPDATE' command or different ID!";
@@ -316,7 +336,7 @@ void add(package *argp, package *result) {
         }
 
         printf("%s\n", result->message);
-        read_from_database(user);
+        print_database_for_user(user);
 
         return;
     }
@@ -387,6 +407,8 @@ void update(package *argp, package *result) {
         }
         printf("\n");
 
+        free(command);
+
         int successful = update_database(user, data_id, no_values, values);
         if (!successful) {
             result->message = "[ERROR] Data ID does not exist in database. Try 'ADD' command!";
@@ -395,7 +417,7 @@ void update(package *argp, package *result) {
         }
 
         printf("%s\n", result->message);
-        read_from_database(user);
+        print_database_for_user(user);
 
         return;
     }
@@ -436,7 +458,9 @@ void del(package *argp, package *result) {
         } else {
             data_id = atoi(string_value);
         }
-		printf("[INFO] Data ID: %d;", data_id);
+		printf("[INFO] Data ID: %d;\n", data_id);
+
+        free(command);
 
         int successful = delete_from_database(user, data_id);
         if (!successful) {
@@ -446,12 +470,64 @@ void del(package *argp, package *result) {
         }
 
         printf("%s\n", result->message);
-        read_from_database(user);
+        print_database_for_user(user);
 
         return;
     }
 }
 
+void read(package *argp, package *result) {
+	users *iterator;
+
+    printf("[INFO] Interpreting 'READ' command.\n");
+
+    user_data *user = check_if_token_valid(argp->token);
+
+    if (user == NULL) {
+        result->message = "[ERROR] Reading data failed! Invalid token!";
+        printf("%s\n", result->message);
+        return;
+
+    } else {
+        printf("[INFO] Reading data for user '%s'...\n", user->user_name);
+
+		int data_id = BLANK;
+
+        char *command = (char*) calloc (MAXBUF, sizeof(char));
+        strcpy(command, argp->command);
+
+        char *string_value = strtok(command, " ");
+        if (string_value == NULL) {
+            result->message = "[ERROR] Could not parse 'READ' command!";
+            printf("%s\n", result->message);
+            return;
+        }
+
+		string_value = strtok(NULL, " ");
+		if (string_value == NULL) {
+            result->message = "[ERROR] Could not parse data ID !";
+            printf("%s\n", result->message);
+            return;
+        } else {
+            data_id = atoi(string_value);
+        }
+		printf("[INFO] Data ID: %d;\n", data_id);
+
+        free(command);
+
+        sensor_data *data_from_database = read_data(user, data_id);
+        if (data_from_database == NULL) {
+            result->message = "[ERROR] Data ID does not exist in database.";
+        } else {
+            result->message = "[SUCCESSFUL] Reading data successful!";
+            result->data = (*data_from_database);
+        }
+
+        printf("%s\n", result->message);
+
+        return;
+    }
+}
 
 package* command_1_svc(package *argp, struct svc_req *rqstp) {
 	static package result;
@@ -480,7 +556,7 @@ package* command_1_svc(package *argp, struct svc_req *rqstp) {
     } else if (strstr(command, UPDATE_COMMAND) == command) {
         update(argp, &result);
     } else if (strstr(command, READ_COMMAND) == command) {
-        printf("%s\n", READ_COMMAND);
+        read(argp, &result);
     } else if (strstr(command, GET_STAT_COMMAND) == command) {
         printf("%s\n", GET_STAT_COMMAND);
     } else if (strstr(command, GET_STAT_ALL_COMMAND) == command) {
