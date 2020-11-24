@@ -102,7 +102,7 @@ int add_to_database(user_data *user, int data_id, int no_values, float *values) 
 	new_data->data.data_id = data_id;
 	new_data->data.no_values = no_values;
 
-	static float static_values[MAXBUF];
+	float *static_values = (float*) calloc (no_values, sizeof(float));
 	for (int i = 0; i < no_values; i++) {
 		static_values[i] = values[i];
 	}
@@ -122,7 +122,9 @@ int update_database(user_data *user, int data_id, int no_values, float *values) 
             if (iterator->data.data_id == data_id) {
                 iterator->data.no_values = no_values;
 
-                static float static_values[MAXBUF];
+				free(iterator->data.array.array_val);
+
+                float *static_values = (float*) calloc (no_values, sizeof(float));
                 for (int i = 0; i < no_values; i++) {
                     static_values[i] = values[i];
                 }
@@ -203,20 +205,77 @@ statistics* get_stat_data(user_data *user, int data_id) {
 					if (x > stat->max) {stat->max = x;}
 					stat->avg += x;
 				}
-				stat->avg /= iterator->data.array.array_len;
+				if (iterator->data.array.array_len != 0) {
+					stat->avg /= iterator->data.array.array_len;
 
-				// computing median
-				int n = iterator->data.array.array_len;
-				sort(iterator->data.array.array_val, n);
-				n = (n + 1) / 2 - 1;
+					// computing median
+                    int n = iterator->data.array.array_len;
+                    sort(iterator->data.array.array_val, n);
+                    n = (n + 1) / 2 - 1;
 
-				stat->med = iterator->data.array.array_val[n];
+                    stat->med = iterator->data.array.array_val[n];
+
+				} else {
+					stat->avg = 0;
+					stat->med = 0;
+					stat->min = 0;
+                    stat->max = 0;
+				}
 
                 return stat;
             }
 
             iterator = iterator->next;
         }
+    }
+
+    return NULL;
+}
+
+statistics* get_stat_all_data(user_data *user, int data_id) {
+	memory_database *iterator;
+	statistics* stat = (statistics*) calloc(1, sizeof(statistics));
+
+	stat->min = INF;
+	stat->max = -INF;
+	stat->avg = 0;
+
+	// array to hold all data for computing median and count of all values
+	float total[MAXBUF];
+	int count = 0;
+
+    if (user->mem_database != NULL) {
+        iterator = user->mem_database;
+
+        while (iterator != NULL) {
+			for (int i = 0; i < iterator->data.array.array_len; i++) {
+				float x = iterator->data.array.array_val[i];
+				if (x < stat->min) {stat->min = x;}
+				if (x > stat->max) {stat->max = x;}
+				stat->avg += x;
+
+				total[count++] = x;
+			}
+
+            iterator = iterator->next;
+        }
+
+        if (count != 0) {
+            stat->avg /= count;
+
+            // computing median
+            sort(total, count);
+            count = (count + 1) / 2 - 1;
+            stat->med = total[count];
+
+        } else {
+            stat->avg = 0;
+            stat->med = 0;
+            stat->min = 0;
+            stat->max = 0;
+        }
+
+        return stat;
     }
 
     return NULL;
@@ -640,6 +699,50 @@ void get_stat(package *argp, package *result) {
     }
 }
 
+void get_stat_all(package *argp, package *result) {
+	users *iterator;
+
+    printf("[INFO] Interpreting 'GET_STAT_ALL' command.\n");
+
+    user_data *user = check_if_token_valid(argp->token);
+
+    if (user == NULL) {
+        result->message = "[ERROR] Getting statistic for all data failed! Invalid token!";
+        printf("%s\n", result->message);
+        return;
+
+    } else {
+        printf("[INFO] Getting statistic for all data for user '%s'...\n", user->user_name);
+
+		int data_id = BLANK;
+
+        char *command = (char*) calloc (strlen(argp->command) + 1, sizeof(char));
+        strcpy(command, argp->command);
+
+        char *string_value = strtok(command, " ");
+        if (string_value == NULL) {
+            result->message = "[ERROR] Could not parse 'GET_STAT_ALL' command!";
+            printf("%s\n", result->message);
+            return;
+        }
+
+        free(command);
+
+        statistics *stat = get_stat_all_data(user, data_id);
+        if (stat == NULL) {
+            result->message = "[ERROR] Data ID does not exist in database.";
+        } else {
+            result->message = "[SUCCESSFUL] Getting statistic for all data successful!";
+            result->stats = (*stat);
+        }
+
+        printf("%s\n", result->message);
+		free(stat);
+
+        return;
+    }
+}
+
 package* command_1_svc(package *argp, struct svc_req *rqstp) {
 	static package result;
 
@@ -668,10 +771,10 @@ package* command_1_svc(package *argp, struct svc_req *rqstp) {
         update(argp, &result);
     } else if (strstr(command, READ_COMMAND) == command) {
         read(argp, &result);
+    } else if (strstr(command, GET_STAT_ALL_COMMAND) == command) {
+		get_stat_all(argp, &result);
     } else if (strstr(command, GET_STAT_COMMAND) == command) {
         get_stat(argp, &result);
-    } else if (strstr(command, GET_STAT_ALL_COMMAND) == command) {
-        printf("%s\n", GET_STAT_ALL_COMMAND);
     } else if (strstr(command, STORE_COMMAND) == command) {
         printf("%s\n", STORE_COMMAND);
     } else if (strstr(command, LOAD_COMMAND) == command) {

@@ -77,6 +77,11 @@ void send_command_to_server(char *command_line) {
             printf("\n");
         }
 
+	} else if ((strstr(command_line, GET_STAT_ALL_COMMAND) == command_line) && (strstr(result->message, ERROR) == NULL)) {
+    		statistics *stats = &(result->stats);
+    		printf("Minimum: %d;\nMaximum: %d;\nAverage: %d;\nMedian: %d\n",
+                    result->stats.min, result->stats.max, result->stats.avg, result->stats.med);
+
     } else if ((strstr(command_line, GET_STAT_COMMAND) == command_line) && (strstr(result->message, ERROR) == NULL)) {
 		statistics *stats = &(result->stats);
 		printf("Minimum: %d;\nMaximum: %d;\nAverage: %d;\nMedian: %d\n",
