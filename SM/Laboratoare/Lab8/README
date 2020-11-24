@@ -1,0 +1,9 @@
+Taner Mustafa - 341C1 - SM - Laborator 8 - Software - Fire de Executie
+
+Program MPI:
+	- primeste ca input un string de maxim 10MB
+	- calculeaza pentru fiecare litera din alfabet A-Z, numarul de aparitii
+
+Run:
+	- gcc ex.c -o ex -lpthread -lm
+	- ./ex
