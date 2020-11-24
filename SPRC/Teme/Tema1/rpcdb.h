@@ -35,6 +35,7 @@ extern "C" {
 #endif
 
 #define MAXBUF 1000
+#define BUF 100
 #define INF 999999
 
 struct sensor_data {

@@ -232,7 +232,7 @@ statistics* get_stat_data(user_data *user, int data_id) {
     return NULL;
 }
 
-statistics* get_stat_all_data(user_data *user, int data_id) {
+statistics* get_stat_all_data(user_data *user) {
 	memory_database *iterator;
 	statistics* stat = (statistics*) calloc(1, sizeof(statistics));
 
@@ -280,6 +280,43 @@ statistics* get_stat_all_data(user_data *user, int data_id) {
 
     return NULL;
 }
+
+int store_data(user_data *user) {
+	memory_database *iterator;
+
+	char filename[BUF];
+	strcpy(filename, user->user_name);
+	strcat(filename, ".");
+	strcat(filename, "rpcdb");
+	printf("[INFO] Storing data for user `%s` in `%s`...\n", user->user_name, filename);
+
+	FILE *fp = fopen(filename, "w+");
+	if (fp == NULL) {
+		printf("[ERROR] Could not (over)write database!");
+		return 0;
+	}
+
+    if (user->mem_database != NULL) {
+        iterator = user->mem_database;
+
+        while (iterator != NULL) {
+			fprintf(fp, "%d %d", iterator->data.data_id, iterator->data.no_values);
+			for (int i = 0; i < iterator->data.array.array_len; i++) {
+				fprintf(fp, " %.2f", iterator->data.array.array_val[i]);
+			}
+			fprintf(fp, "\n");
+
+            iterator = iterator->next;
+        }
+
+		fclose(fp);
+        return 1;
+    }
+
+	fclose(fp);
+    return 0;
+}
+
 
 void login(package *argp, char *command, package *result) {
 	users *iterator, *previous, *new_user;
@@ -714,23 +751,9 @@ void get_stat_all(package *argp, package *result) {
     } else {
         printf("[INFO] Getting statistic for all data for user '%s'...\n", user->user_name);
 
-		int data_id = BLANK;
-
-        char *command = (char*) calloc (strlen(argp->command) + 1, sizeof(char));
-        strcpy(command, argp->command);
-
-        char *string_value = strtok(command, " ");
-        if (string_value == NULL) {
-            result->message = "[ERROR] Could not parse 'GET_STAT_ALL' command!";
-            printf("%s\n", result->message);
-            return;
-        }
-
-        free(command);
-
-        statistics *stat = get_stat_all_data(user, data_id);
+        statistics *stat = get_stat_all_data(user);
         if (stat == NULL) {
-            result->message = "[ERROR] Data ID does not exist in database.";
+            result->message = "[ERROR] No data in database!";
         } else {
             result->message = "[SUCCESSFUL] Getting statistic for all data successful!";
             result->stats = (*stat);
@@ -738,6 +761,34 @@ void get_stat_all(package *argp, package *result) {
 
         printf("%s\n", result->message);
 		free(stat);
+
+        return;
+    }
+}
+
+void store(package *argp, package *result) {
+	users *iterator;
+
+    printf("[INFO] Interpreting 'STORE' command.\n");
+
+    user_data *user = check_if_token_valid(argp->token);
+
+    if (user == NULL) {
+        result->message = "[ERROR] Storing data failed! Invalid token!";
+        printf("%s\n", result->message);
+        return;
+
+    } else {
+        printf("[INFO] Storing data for user '%s'...\n", user->user_name);
+
+        int ret = store_data(user);
+        if (ret == 0) {
+            result->message = "[ERROR] No data in database!";
+        } else {
+            result->message = "[SUCCESSFUL] Storing data successful!";
+        }
+
+        printf("%s\n", result->message);
 
         return;
     }
@@ -776,7 +827,7 @@ package* command_1_svc(package *argp, struct svc_req *rqstp) {
     } else if (strstr(command, GET_STAT_COMMAND) == command) {
         get_stat(argp, &result);
     } else if (strstr(command, STORE_COMMAND) == command) {
-        printf("%s\n", STORE_COMMAND);
+        store(argp, &result);
     } else if (strstr(command, LOAD_COMMAND) == command) {
         printf("%s\n", LOAD_COMMAND);
     } else {
