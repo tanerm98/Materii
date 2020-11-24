@@ -8,6 +8,25 @@
 
 users *userss = NULL;
 
+void swap(float *p, float *q) {
+   float t;
+   t = *p;
+   *p = *q;
+   *q = t;
+}
+
+void sort(float a[], int n) {
+	int i, j;
+
+	for(i = 0; i < n-1; i++) {
+		for(j = 0; j < n-i-1; j++) {
+			if(a[j] > a[j+1]) {
+				swap(&a[j], &a[j+1]);
+			}
+		}
+	}
+}
+
 void free_memory_database(memory_database *list) {
 	printf("[INFO] Freeing memory database for logged out user...\n");
 	memory_database *pointer;
@@ -165,6 +184,44 @@ sensor_data* read_data(user_data *user, int data_id) {
 	return NULL;
 }
 
+statistics* get_stat_data(user_data *user, int data_id) {
+	memory_database *iterator;
+	statistics* stat = (statistics*) calloc(1, sizeof(statistics));
+
+	stat->min = INF;
+	stat->max = -INF;
+	stat->avg = 0;
+
+    if (user->mem_database != NULL) {
+        iterator = user->mem_database;
+
+        while (iterator != NULL) {
+            if (iterator->data.data_id == data_id) {
+				for (int i = 0; i < iterator->data.array.array_len; i++) {
+					float x = iterator->data.array.array_val[i];
+					if (x < stat->min) {stat->min = x;}
+					if (x > stat->max) {stat->max = x;}
+					stat->avg += x;
+				}
+				stat->avg /= iterator->data.array.array_len;
+
+				// computing median
+				int n = iterator->data.array.array_len;
+				sort(iterator->data.array.array_val, n);
+				n = (n + 1) / 2 - 1;
+
+				stat->med = iterator->data.array.array_val[n];
+
+                return stat;
+            }
+
+            iterator = iterator->next;
+        }
+    }
+
+    return NULL;
+}
+
 void login(package *argp, char *command, package *result) {
 	users *iterator, *previous, *new_user;
 
@@ -279,7 +336,7 @@ void add(package *argp, package *result) {
 		int data_id = BLANK;
         int no_values = BLANK;
 
-        char *command = (char*) calloc (MAXBUF, sizeof(char));
+        char *command = (char*) calloc (strlen(argp->command) + 1, sizeof(char));
         strcpy(command, argp->command);
 
         char *string_value = strtok(command, " ");
@@ -360,7 +417,7 @@ void update(package *argp, package *result) {
 		int data_id = BLANK;
         int no_values = BLANK;
 
-        char *command = (char*) calloc (MAXBUF, sizeof(char));
+        char *command = (char*) calloc (strlen(argp->command) + 1, sizeof(char));
         strcpy(command, argp->command);
 
         char *string_value = strtok(command, " ");
@@ -440,7 +497,7 @@ void del(package *argp, package *result) {
 
 		int data_id = BLANK;
 
-        char *command = (char*) calloc (MAXBUF, sizeof(char));
+        char *command = (char*) calloc (strlen(argp->command) + 1, sizeof(char));
         strcpy(command, argp->command);
 
         char *string_value = strtok(command, " ");
@@ -493,7 +550,7 @@ void read(package *argp, package *result) {
 
 		int data_id = BLANK;
 
-        char *command = (char*) calloc (MAXBUF, sizeof(char));
+        char *command = (char*) calloc (strlen(argp->command) + 1, sizeof(char));
         strcpy(command, argp->command);
 
         char *string_value = strtok(command, " ");
@@ -529,6 +586,60 @@ void read(package *argp, package *result) {
     }
 }
 
+void get_stat(package *argp, package *result) {
+	users *iterator;
+
+    printf("[INFO] Interpreting 'GET_STAT' command.\n");
+
+    user_data *user = check_if_token_valid(argp->token);
+
+    if (user == NULL) {
+        result->message = "[ERROR] Getting statistic for data failed! Invalid token!";
+        printf("%s\n", result->message);
+        return;
+
+    } else {
+        printf("[INFO] Getting statistic for data for user '%s'...\n", user->user_name);
+
+		int data_id = BLANK;
+
+        char *command = (char*) calloc (strlen(argp->command) + 1, sizeof(char));
+        strcpy(command, argp->command);
+
+        char *string_value = strtok(command, " ");
+        if (string_value == NULL) {
+            result->message = "[ERROR] Could not parse 'GET_STAT' command!";
+            printf("%s\n", result->message);
+            return;
+        }
+
+		string_value = strtok(NULL, " ");
+		if (string_value == NULL) {
+            result->message = "[ERROR] Could not parse data ID !";
+            printf("%s\n", result->message);
+            return;
+        } else {
+            data_id = atoi(string_value);
+        }
+		printf("[INFO] Data ID: %d;\n", data_id);
+
+        free(command);
+
+        statistics *stat = get_stat_data(user, data_id);
+        if (stat == NULL) {
+            result->message = "[ERROR] Data ID does not exist in database.";
+        } else {
+            result->message = "[SUCCESSFUL] Getting statistic for data successful!";
+            result->stats = (*stat);
+        }
+
+        printf("%s\n", result->message);
+		free(stat);
+
+        return;
+    }
+}
+
 package* command_1_svc(package *argp, struct svc_req *rqstp) {
 	static package result;
 
@@ -558,7 +669,7 @@ package* command_1_svc(package *argp, struct svc_req *rqstp) {
     } else if (strstr(command, READ_COMMAND) == command) {
         read(argp, &result);
     } else if (strstr(command, GET_STAT_COMMAND) == command) {
-        printf("%s\n", GET_STAT_COMMAND);
+        get_stat(argp, &result);
     } else if (strstr(command, GET_STAT_ALL_COMMAND) == command) {
         printf("%s\n", GET_STAT_ALL_COMMAND);
     } else if (strstr(command, STORE_COMMAND) == command) {

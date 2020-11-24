@@ -64,10 +64,9 @@ void send_command_to_server(char *command_line) {
 
 	if ((strstr(command_line, LOGIN_COMMAND) == command_line) && (result->token != REJECTED_TOKEN)) {
         token = result->token;
+
     } else if ((strstr(command_line, READ_COMMAND) == command_line) && (strstr(result->message, ERROR) == NULL)) {
         sensor_data *data = &(result->data);
-        printf("[SUCCESSFUL] Received data:\n");
-
         printf("ID: %d; NO: %d;\n", data->data_id, data->no_values);
 
         if (data->no_values > 0) {
@@ -77,7 +76,12 @@ void send_command_to_server(char *command_line) {
             }
             printf("\n");
         }
-    }
+
+    } else if ((strstr(command_line, GET_STAT_COMMAND) == command_line) && (strstr(result->message, ERROR) == NULL)) {
+		statistics *stats = &(result->stats);
+		printf("Minimum: %d;\nMaximum: %d;\nAverage: %d;\nMedian: %d\n",
+                result->stats.min, result->stats.max, result->stats.avg, result->stats.med);
+	}
 }
 
 void execute_commands() {
