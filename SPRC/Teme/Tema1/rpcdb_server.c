@@ -317,6 +317,94 @@ int store_data(user_data *user) {
     return 0;
 }
 
+int load_data(user_data *user) {
+	memory_database *iterator;
+
+	char filename[BUF];
+	strcpy(filename, user->user_name);
+	strcat(filename, ".");
+	strcat(filename, "rpcdb");
+	printf("[INFO] Loading data for user `%s` from `%s`...\n", user->user_name, filename);
+
+	FILE *fp = fopen(filename, "r");
+	if (fp == NULL) {
+		printf("[ERROR] Could not load database - no existing data on disk!\n");
+		return 0;
+	}
+
+    if (user->mem_database == NULL) {
+        char line[MAXBUF], *command_;
+
+        while (fgets (line, MAXBUF, fp) != NULL) {
+            command_ = strtok (line, "\n");
+            if (command_ == NULL) {
+                break;
+            }
+
+            int data_id, no_values;
+            char *command = (char*) calloc (strlen(command_) + 1, sizeof(char));
+            char *string_value;
+            strcpy(command, command_);
+
+            for (int i = 0; i < 2; i++) {
+                if (i == 0) {
+                    string_value = strtok(command, " ");
+                } else {
+                    string_value = strtok(NULL, " ");
+                }
+                if (string_value == NULL) {
+                    printf("[ERROR] Could not parse data ID and/or number of values!\n");
+                    return 0;
+
+                } else {
+                    if (i == 0) {
+                        data_id = atoi(string_value);
+                    } else {
+                        no_values = atoi(string_value);
+                        if (no_values < 0) {
+                            printf("[ERROR] Number of values must be greater than 0!\n");
+                            return 0;
+                        }
+                    }
+                }
+            }
+            printf("[INFO] Data ID: %d; Number of values: %d; Values found: ", data_id, no_values);
+
+            float values[no_values];
+            for (int i = 0; i < no_values; i++) {
+                string_value = strtok(NULL, " ");
+                if (string_value == NULL) {
+                    printf("[ERROR] Could not parse all values!\n");
+                    return 0;
+
+                } else {
+                    values[i] = atof(string_value);
+                    printf("%.2f; ", values[i]);
+                }
+            }
+            printf("\n");
+
+            free(command);
+
+            int successful = add_to_database(user, data_id, no_values, values);
+            if (!successful) {
+                printf("[ERROR] Can't add data with ID equal to existing one!\n");
+            } else {
+                printf("[SUCCESSFUL] Adding data successful!\n");
+            }
+        }
+
+        print_database_for_user(user);
+		fclose(fp);
+
+        return 1;
+    }
+
+	printf("[ERROR] Could not load database - can't overwrite existing data from memory!");
+	fclose(fp);
+
+    return 0;
+}
 
 void login(package *argp, char *command, package *result) {
 	users *iterator, *previous, *new_user;
@@ -794,6 +882,34 @@ void store(package *argp, package *result) {
     }
 }
 
+void load(package *argp, package *result) {
+	users *iterator;
+
+    printf("[INFO] Interpreting 'LOAD' command.\n");
+
+    user_data *user = check_if_token_valid(argp->token);
+
+    if (user == NULL) {
+        result->message = "[ERROR] Loading data failed! Invalid token!";
+        printf("%s\n", result->message);
+        return;
+
+    } else {
+        printf("[INFO] Loading data for user '%s'...\n", user->user_name);
+
+        int ret = load_data(user);
+        if (ret == 0) {
+            result->message = "[ERROR] No existing data to load or can't overwrite existing data in memory!";
+        } else {
+            result->message = "[SUCCESSFUL] Loading data successful!";
+        }
+
+        printf("%s\n", result->message);
+
+        return;
+    }
+}
+
 package* command_1_svc(package *argp, struct svc_req *rqstp) {
 	static package result;
 
@@ -829,7 +945,7 @@ package* command_1_svc(package *argp, struct svc_req *rqstp) {
     } else if (strstr(command, STORE_COMMAND) == command) {
         store(argp, &result);
     } else if (strstr(command, LOAD_COMMAND) == command) {
-        printf("%s\n", LOAD_COMMAND);
+        load(argp, &result);
     } else {
         result.message = "[ERROR] Could not interpret command!";
         printf("%s\n", result.message);
