@@ -115,6 +115,20 @@ int main (int argc, char *argv[]) {
 
 	connect_to_server(host);
 
+	char *instructions = (char*) calloc (MAXBUF, sizeof(char));
+	strcat(instructions, "*** Usage instructions: ***\n");
+	strcat(instructions, "-- login <username> -- log in on server with provided username\n");
+	strcat(instructions, "-- logout -- log out from server\n");
+	strcat(instructions, "-- add <data_id> <no_values> <value_1> <value_2> ... <value_no_values> -- add data with data ID\n");
+	strcat(instructions, "-- update <data_id> <no_values> <value_1> <value_2> ... <value_no_values> -- update existing data\n");
+	strcat(instructions, "-- del <data_id> -- delete data with data ID\n");
+	strcat(instructions, "-- read <data_id> -- read data with data ID\n");
+	strcat(instructions, "-- get_stat <data_id> -- get statistics for data with data ID\n");
+	strcat(instructions, "-- get_stat_all -- get statistics for the whole database\n");
+	strcat(instructions, "-- load -- load database from server disk memory\n");
+	strcat(instructions, "-- store -- store database to server disck memory\n");
+	printf("\n%s\n", instructions);
+
     get_commands_input(argc, argv);
     execute_commands();
     fclose(commannds_file);

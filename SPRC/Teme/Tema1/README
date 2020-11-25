@@ -1,5 +1,51 @@
-RPCDB - SPRC Tema 2 - Taner Mustafa - 341C1
+RPCDB - SPRC Tema 1 - Taner Mustafa - 341C1
 
-Warmup:     #exemplul din slide-uri
-	rpcgen -C -a rpcdb.x
+How to run:
 	make -f Makefile.rpcdb
+	./rpcdb_server
+	./rpcdb_client <IP> [commands_file]
+
+Instructions:
+    *** Usage instructions: ***\n");
+	    -- login <username>                                                         -- log in on server with provided username
+	    -- logout                                                                   -- log out from server
+	    -- add <data_id> <no_values> <value_1> <value_2> ... <value_no_values>      -- add data with data ID
+	    -- update <data_id> <no_values> <value_1> <value_2> ... <value_no_values>   -- update existing data
+	    -- del <data_id>                                                            -- delete data with data ID
+	    -- read <data_id>                                                           -- read data with data ID
+	    -- get_stat <data_id>                                                       -- get statistics for data with data ID
+	    -- get_stat_all                                                             -- get statistics for the whole database
+	    -- load                                                                     -- load database from server disk memory
+	    -- store                                                                    -- store database to server disck memory
+
+Implementation:
+			I tried to implement all the logic in the server and make the client as simple as possible - more secure against
+		hacker, reverse engineering of the client, etc...
+	Security:
+		- no action is possible without token
+		- token is obtained at login; generated a new one again at each login;
+		- token is deleted at logout;
+		- database from memory is deleted at logout;
+		- from a single client, multiple user logins are possible - sequentially.
+	Communication server-client:
+		- each message (request and reply) has the `package` format - see in `rpcdb.h`
+		- used `package` because it contains every possible needed type of information between server and client;
+	Storing database:
+		- database is stored dynamically in memory and freed at logout;
+		- when `store` command is given, database from memory overwrites the one from disk;
+		- when `load` happens, database from disk loads to memory, only if memory is empty with no data;
+	Error handling (errors that are handled by the server):
+		- invalid command (not one of the implemented ones);
+		- valid command with invalid parameters;
+		- adding data with duplicate ID;
+		- adding less than 0 number of values;
+		- updating/deleting/reading/getting statistics for data with non existent ID;
+		- getting statistics on empty database;
+		- logging in with an already authenticated user name;
+		- logging out when not logged in.
+
+Bugs:
+	- in the same client, if 2 consecutive logins for different users happen, the first user that logged in has no
+	way or relogging in or obtaining its token;
+	- statistics have `int` type - implemented everything this way and then realized the mistake - didn't bother to fix
+	as it's not the main scope of the homework.
