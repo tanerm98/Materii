@@ -1,0 +1,8 @@
+
+Compilare + rulare:
+
+- Secvential:
+	- Python:
+		> python3 serial.py
+	- C:
+		> gcc serial.c -o serial
