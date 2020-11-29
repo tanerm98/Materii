@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #define DIRECT      1
 #define INFERIOR    2
@@ -14,32 +15,15 @@ int BLOCK_TYPES[BLOCK_TYPES_NR] = {DIRECT, INFERIOR, INVERSE, SUPERIOR};
 
 int N = 0;  // number of input/output values (must be power of 2)
 int m = 0;  // number of levels per network (computed from N)
+
 int n = 0;  // number of input/output pairs | number of networks to compute
+
+int nr_of_rows = 0;     // number of rows per network
+int nr_of_blocks = 0;   // number of blocks in network
 
 int **INPUT, **OUTPUT;
 
 FILE *input_file = NULL;
-
-void cartesian(int version[N]) {
-	int i, j;
-	for (i = 0; i < N; i++) {
-		if (version[i] == EMPTY) {
-			for (j = 0; j < BLOCK_TYPES_NR; j++) {
-				version[i] = BLOCK_TYPES[j];
-				if (i == N - 1) {
-                    for (int k = 0; k < N; k++) {
-                        printf("%d, ", version[k]);
-                    }
-                    printf("\n");
-                } else {
-                    cartesian(version);
-                }
-			}
-			version[i] = EMPTY;
-			return;
-		}
-	}
-}
 
 void open_input(int argc, char *argv[]) {
 	if (argc == 2) {
@@ -119,19 +103,49 @@ void get_input() {
         }
         printf("\n");
 	}
+}
 
-	free(INPUT);
-	free(OUTPUT);
+void compute_network_properties() {
+	m = log2(N);
+    printf("Number of levels: %d\n", m);
+
+    nr_of_rows = N / 2;
+    printf("Number of rows: %d\n", nr_of_rows);
+
+    nr_of_blocks = m * nr_of_rows;
+    printf("Number of blocks: %d\n", nr_of_blocks);
+}
+
+void generate_possibilities(int *version) {
+	for (int i = 0; i < nr_of_blocks; i++) {
+		if (version[i] == EMPTY) {
+			for (int j = 0; j < BLOCK_TYPES_NR; j++) {
+				version[i] = BLOCK_TYPES[j];
+				if (i == nr_of_blocks - 1) {
+                    for (int k = 0; k < nr_of_blocks; k++) {
+                        printf("%d, ", version[k]);
+                    }
+                    printf("\n");
+                } else {
+                    generate_possibilities(version);
+                }
+			}
+			version[i] = EMPTY;
+			return;
+		}
+	}
 }
 
 int main (int argc, char *argv[]) {
 
 	open_input(argc, argv);
 	get_input();
+	compute_network_properties();
 
-//	int *version = (int*) calloc (N, sizeof(int));
-//	memset (version, EMPTY, N * sizeof(int));
-//	cartesian(version);
+	int *version = (int*) calloc (nr_of_blocks, sizeof(int));
+	memset (version, EMPTY, nr_of_blocks * sizeof(int));
+
+	generate_possibilities(version);
 
 	return 0;
 }
