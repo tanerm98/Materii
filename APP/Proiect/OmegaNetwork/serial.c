@@ -1,143 +1,103 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
+#include "header.h"
 
-#define DIRECT      1
-#define INFERIOR    2
-#define INVERSE     3
-#define SUPERIOR    4
-
-#define BLOCK_TYPES_NR 4
-#define EMPTY -1
-
-int BLOCK_TYPES[BLOCK_TYPES_NR] = {DIRECT, INFERIOR, INVERSE, SUPERIOR};
-
-int N = 0;  // number of input/output values (must be power of 2)
-int m = 0;  // number of levels per network (computed from N)
-
-int n = 0;  // number of input/output pairs | number of networks to compute
-
-int nr_of_rows = 0;     // number of rows per network
-int nr_of_blocks = 0;   // number of blocks in network
-
-int **INPUT, **OUTPUT;
-
-FILE *input_file = NULL;
-
-void open_input(int argc, char *argv[]) {
-	if (argc == 2) {
-		printf("Getting input from file '%s'...\n", argv[1]);
-        input_file = fopen(argv[1], "r");
-    } else {
-        printf("Getting input from STDIN...\n");
-        input_file = stdin;
-    }
-
-	if (input_file == NULL) {
-        printf("[ERROR] Could not open input!\n");
-        exit(1);
+void generate_possibilities(int *version, int io_pair) {
+	if (!found_result) {
+        for (int i = 0; i < nr_of_blocks; i++) {
+	        if (version[i] == EMPTY) {
+	            for (int j = 0; j < BLOCK_TYPES_NR; j++) {
+	                version[i] = BLOCK_TYPES[j];
+	                if (i == nr_of_blocks - 1) {
+	                    if (!found_result) {
+                            check_possibility(version, io_pair);
+	                    }
+	                } else {
+	                    generate_possibilities(version, io_pair);
+	                }
+	            }
+	            version[i] = EMPTY;
+	            return;
+	        }
+	    }
     }
 }
 
-void get_input() {
-	int ret, i, j;
+void check_possibility(int *version, int io_pair) {
+	int shuffled_value;
 
-	printf("Number of input/output values: ");
-	ret = fscanf(input_file, "%d", &N);
-	if ((!ret) || (N <= 0)) {
-		printf("[ERROR] please input correct value for 'N'!\n");
-		exit(1);
-	}
-	if (input_file != stdin) {
-		printf("%d\n", N);
-	}
-	if ((N & (N - 1)) != 0) {
-		printf("N must be a power of 2!\n");
-		exit(1);
-	}
+	int *input_values = (int*) malloc (N * sizeof(int));
+	int *shuffled_values = (int*) malloc (N * sizeof(int));
+	int *output_values;
 
-	printf("Number of input/output pairs: ");
-    ret = fscanf(input_file, "%d", &n);
-	if ((!ret) || (n <= 0)) {
-        printf("[ERROR] please input correct value for 'n'!\n");
-        exit(1);
-    }
-    if (input_file != stdin) {
-        printf("%d\n", n);
-    }
+	memcpy(input_values, INPUT[io_pair], N * sizeof(int));
 
-	INPUT = (int**) calloc (n, sizeof(int*));
-	OUTPUT = (int**) calloc (n, sizeof(int*));
-
-	for (i = 0; i < n; i++) {
-		INPUT[i] = (int*) calloc (N, sizeof(int));
-		printf("INPUT  no. %d: ", i + 1);
-		for (j = 0; j < N; j++) {
-		    ret = fscanf(input_file, "%d", &INPUT[i][j]);
-			if (!ret) {
-			    printf("[ERROR] please input correct values for INPUT no. %d!\n", i + 1);
-			    free(INPUT);
-                free(OUTPUT);
-			    exit(1);
-			}
-			if (input_file != stdin) {
-		        printf("%d ", INPUT[i][j]);
-            }
+	for (int level = 0; level < m; level++) {
+		for (int i = 0; i < N; i++) {
+			shuffled_value = shuffle(i);
+			shuffled_values[shuffled_value] = input_values[i];
 		}
-		printf("\n");
+		free(input_values);
 
-		OUTPUT[i] = (int*) calloc (N, sizeof(int));
-		printf("OUTPUT no. %d: ", i + 1);
-		for (j = 0; j < N; j++) {
-            ret = fscanf(input_file, "%d", &OUTPUT[i][j]);
-            if (!ret) {
-                printf("[ERROR] please input correct values for OUTPUT no. %d!\n", i + 1);
-                free(INPUT);
-                free(OUTPUT);
-                exit(1);
-            }
-            if (input_file != stdin) {
-                printf("%d ", OUTPUT[i][j]);
-            }
-        }
-        printf("\n");
+		output_values = go_through_level(level * N / 2, shuffled_values, version);
+        input_values = output_values;
 	}
+
+	if (memcmp(output_values, OUTPUT[io_pair], N * sizeof(int)) == 0) {
+		found_result = 1;
+		print_output(version, io_pair);
+	}
+
+	free(shuffled_values);
+	free(output_values);
 }
 
-void compute_network_properties() {
-	m = log2(N);
-    printf("Number of levels: %d\n", m);
+void print_output(int *blocks, int io_pair) {
+	// construct row separator
+	char *row_separator = (char*) malloc (10 * m * sizeof(char));
+	memset(row_separator, '-', 10 * m * sizeof(char));
 
-    nr_of_rows = N / 2;
-    printf("Number of rows: %d\n", nr_of_rows);
+	// construct header
+	char *header = (char*) calloc (10 * m, sizeof(char));
+	char word[20];
+	char *LEVEL = "LEVEL";
+	for (int level = m - 1; level >= 0; level--) {
+		sprintf(word, "(%s %d)", LEVEL, level);
+		strcat(header, word);
 
-    nr_of_blocks = m * nr_of_rows;
-    printf("Number of blocks: %d\n", nr_of_blocks);
-}
-
-void generate_possibilities(int *version) {
-	for (int i = 0; i < nr_of_blocks; i++) {
-		if (version[i] == EMPTY) {
-			for (int j = 0; j < BLOCK_TYPES_NR; j++) {
-				version[i] = BLOCK_TYPES[j];
-				if (i == nr_of_blocks - 1) {
-                    for (int k = 0; k < nr_of_blocks; k++) {
-                        printf("%d, ", version[k]);
-                    }
-                    printf("\n");
-                } else {
-                    generate_possibilities(version);
-                }
+		// add padding
+		int padding = 10 - strlen(header) % 10;
+		if (padding != 10) {
+			for (int i = 0; i < padding; i++) {
+				strcat(header, " ");
 			}
-			version[i] = EMPTY;
-			return;
 		}
 	}
-}
 
-int shuffle(int i) {
-	return (int)(((2 * i) + (int)(2 * i / N)) % N);
+	printf("\nOMEGA network for INPUT/OUTPUT pair no. %d:\n\n", io_pair + 1);
+	printf("         %s\n         %s\n", header, row_separator);
+
+	for (int row = 0; row < nr_of_rows; row++) {
+		printf("(ROW %d) ", row);
+		for (int level = row; level < nr_of_blocks; level += nr_of_rows) {
+			switch(blocks[level]) {
+				case DIRECT:
+					printf("|  DIRECT ");
+					break;
+				case INFERIOR:
+                    printf("| INFERIOR");
+                    break;
+                case INVERSE:
+                    printf("| INVERSE ");
+                    break;
+                case SUPERIOR:
+                    printf("| SUPERIOR");
+                    break;
+                default:
+                    break;
+			}
+		}
+		printf("|\n         %s\n", row_separator);
+	}
+	printf("\n");
 }
 
 int main (int argc, char *argv[]) {
@@ -146,10 +106,18 @@ int main (int argc, char *argv[]) {
 	get_input();
 	compute_network_properties();
 
-	int *version = (int*) calloc (nr_of_blocks, sizeof(int));
-	memset (version, EMPTY, nr_of_blocks * sizeof(int));
+	int *version = (int*) malloc (nr_of_blocks * sizeof(int));
 
-	generate_possibilities(version);
+	for (int io_pair = 0; io_pair < n; io_pair++) {
+		found_result = 0;
+		memset (version, EMPTY, nr_of_blocks * sizeof(int));
+		generate_possibilities(version, io_pair);
+		if (!found_result) {
+			printf("Invalid INPUT/OUTPUT pair! No OMEGA network possible!\n");
+		}
+	}
+
+	free(version);
 
 	return 0;
 }
