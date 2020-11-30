@@ -136,6 +136,10 @@ void generate_possibilities(int *version) {
 	}
 }
 
+int shuffle(int i) {
+	return (int)(((2 * i) + (int)(2 * i / N)) % N);
+}
+
 int main (int argc, char *argv[]) {
 
 	open_input(argc, argv);
