@@ -1,8 +1,9 @@
 
-Compilare + rulare:
+Compilare:
+	> make build
 
-- Secvential:
-	- Python:
-		> python3 serial.py
-	- C:
-		> gcc serial.c -o serial
+Rulare un tip de paralelism:
+	> make run_<tip> [P=<nr_proc>]
+
+Curatare:
+	> make clean
