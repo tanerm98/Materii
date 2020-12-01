@@ -1,9 +1,17 @@
 #include "header.h"
-#include <omp.h>
+#include <pthread.h>
 
 int P = 1;
 
-void check_possibility_openmp(int *version, int io_pair, int *found_result) {
+struct thread_data {
+	int tid;
+	int **v;
+	int count;
+    int *found_result;
+    int io_pair;
+};
+
+void check_possibility_pthread(int *version, int io_pair, int *found_result) {
 	int shuffled_value;
 
 	int *input_values = (int*) malloc (N * sizeof(int));
@@ -32,7 +40,7 @@ void check_possibility_openmp(int *version, int io_pair, int *found_result) {
 	free(output_values);
 }
 
-void generate_possibilities_openmp(int *version, int io_pair, int *found_result) {
+void generate_possibilities_pthread(int *version, int io_pair, int *found_result) {
 	if (!(*found_result)) {
         for (int i = 2; i < nr_of_blocks; i++) {
 	        if (version[i] == EMPTY) {
@@ -40,16 +48,42 @@ void generate_possibilities_openmp(int *version, int io_pair, int *found_result)
 	                version[i] = BLOCK_TYPES[j];
 	                if (i == nr_of_blocks - 1) {
 	                    if (!(*found_result)) {
-                            check_possibility_openmp(version, io_pair, found_result);
+                            check_possibility_pthread(version, io_pair, found_result);
 	                    }
 	                } else {
-	                    generate_possibilities_openmp(version, io_pair, found_result);
+	                    generate_possibilities_pthread(version, io_pair, found_result);
 	                }
 	            }
 	            version[i] = EMPTY;
 	            return;
 	        }
 	    }
+    }
+}
+
+void *pthread_task(void *arguments) {
+    int tid, **v, count, *found_result, io_pair;
+
+	struct thread_data *args = (struct thread_data *)arguments;
+	tid = args->tid;
+	v = args->v;
+	count = args->count;
+	found_result = args->found_result;
+	io_pair = args->io_pair;
+
+	int start = tid * (double)count / P;
+    int end = fmin((tid + 1) * (double)count / P, count);
+
+	for (int i = start; i < end; i++) {
+        int *version = (int*) malloc (nr_of_blocks * sizeof(int));
+        memset (version, EMPTY, nr_of_blocks * sizeof(int));
+        memcpy (version, v[i], 2 * sizeof(int));
+
+        if (!(*found_result)) {
+            generate_possibilities_pthread(version, io_pair, found_result);
+        }
+
+        free(version);
     }
 }
 
@@ -60,14 +94,19 @@ void generate_parallel_possibilities(int io_pair, int *found_result) {
         for (int i = 0; i < BLOCK_TYPES_NR; i++) {
             if (!(*found_result)) {
                 version[0] = BLOCK_TYPES[i];
-                check_possibility_openmp(version, io_pair, found_result);
+                check_possibility_pthread(version, io_pair, found_result);
             }
         }
         return;
     }
 
-	int v[16][2];
+	int **v;
 	int count = 0;
+
+	v = (int**) malloc (16 * sizeof(int*));
+	for (int i = 0; i < 16; i++) {
+		v[i] = (int*) malloc (2 * sizeof(int));
+	}
 
     for (int i = 0; i < BLOCK_TYPES_NR; i++) {
         for (int j = 0; j < BLOCK_TYPES_NR; j++) {
@@ -77,17 +116,23 @@ void generate_parallel_possibilities(int io_pair, int *found_result) {
         }
     }
 
-    #pragma omp parallel for shared(found_result) num_threads(P)
-    for (int i = 0; i < count; i++) {
-        int *version = (int*) malloc (nr_of_blocks * sizeof(int));
-        memset (version, EMPTY, nr_of_blocks * sizeof(int));
-        memcpy (version, v[i], 2 * sizeof(int));
+	int ret;
+	pthread_t threads[P];
+	for (int i = 0; i < P; i++) {
+		struct thread_data *data = (struct thread_data*) malloc (sizeof(struct thread_data));
+        data->tid = i;
+        data->v = v;
+        data->count = count;
+        data->found_result = found_result;
+        data->io_pair = io_pair;
 
-        if (!(*found_result)) {
-            generate_possibilities_openmp(version, io_pair, found_result);
+        ret = pthread_create(&(threads[i]), NULL, pthread_task, (void*)data);
+        if (ret < 0) {
+            printf("[ERROR] Could not create thread with ID = '%d'\n", i);
         }
-
-        free(version);
+	}
+	for (int i = 0; i < P; i++) {
+        pthread_join(threads[i], NULL);
     }
 }
 

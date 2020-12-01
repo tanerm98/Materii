@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 
 #define DIRECT      1
 #define INFERIOR    2
@@ -32,11 +33,19 @@ int found_result = 0;
 void open_input(int argc, char *argv[]);
 void get_input();
 void compute_network_properties();
-void generate_possibilities(int *version, int io_pair);
 int shuffle(int i);
-void check_possibility(int *version, int io_pair);
 int* go_through_level(int start, int *values, int *blocks);
 void print_output(int *blocks, int io_pair);
+
+// serial
+void generate_possibilities(int *version, int io_pair);
+void check_possibility(int *version, int io_pair);
+
+// openmp
+void generate_possibilities_openmp(int *version, int io_pair, int *found_result);
+void check_possibility_openmp(int *version, int io_pair, int *found_result);
+void generate_parallel_possibilities(int io_pair, int *found_result);
+
 
 void open_input(int argc, char *argv[]) {
 	if (argc >= 2) {
@@ -160,36 +169,9 @@ int* go_through_level(int start, int *values, int *blocks) {
     return output;
 }
 
-void check_possibility(int *version, int io_pair) {
-	int shuffled_value;
-
-	int *input_values = (int*) malloc (N * sizeof(int));
-	int *shuffled_values = (int*) malloc (N * sizeof(int));
-	int *output_values;
-
-	memcpy(input_values, INPUT[io_pair], N * sizeof(int));
-
-	for (int level = 0; level < m; level++) {
-		for (int i = 0; i < N; i++) {
-			shuffled_value = shuffle(i);
-			shuffled_values[shuffled_value] = input_values[i];
-		}
-		free(input_values);
-
-		output_values = go_through_level(level * N / 2, shuffled_values, version);
-        input_values = output_values;
-	}
-
-	if (memcmp(output_values, OUTPUT[io_pair], N * sizeof(int)) == 0) {
-		found_result = 1;
-		print_output(version, io_pair);
-	}
-
-	free(shuffled_values);
-	free(output_values);
-}
-
 void print_output(int *blocks, int io_pair) {
+	char* output = (char*) calloc ((1 + nr_of_rows) * (1 + m) * 20, sizeof(char));
+
 	// construct row separator
 	char *row_separator = (char*) malloc (10 * m * sizeof(char));
 	memset(row_separator, '-', 10 * m * sizeof(char));
@@ -211,30 +193,30 @@ void print_output(int *blocks, int io_pair) {
 		}
 	}
 
-	printf("\nOMEGA network for INPUT/OUTPUT pair no. %d:\n\n", io_pair + 1);
-	printf("         %s\n         %s\n", header, row_separator);
+	sprintf(output, "\nOMEGA network for INPUT/OUTPUT pair no. %d:\n\n", io_pair + 1);
+	sprintf(output, "%s         %s\n         %s\n", output, header, row_separator);
 
 	for (int row = 0; row < nr_of_rows; row++) {
-		printf("(ROW %d) ", row);
+		sprintf(output, "%s(ROW %d) ", output, row);
 		for (int level = row; level < nr_of_blocks; level += nr_of_rows) {
 			switch(blocks[level]) {
 				case DIRECT:
-					printf("|  DIRECT ");
+					sprintf(output, "%s|  DIRECT ", output);
 					break;
 				case INFERIOR:
-                    printf("| INFERIOR");
+                    sprintf(output, "%s| INFERIOR", output);
                     break;
                 case INVERSE:
-                    printf("| INVERSE ");
+                    sprintf(output, "%s| INVERSE ", output);
                     break;
                 case SUPERIOR:
-                    printf("| SUPERIOR");
+                    sprintf(output, "%s| SUPERIOR", output);
                     break;
                 default:
                     break;
 			}
 		}
-		printf("|\n         %s\n", row_separator);
+		sprintf(output, "%s|\n         %s\n", output, row_separator);
 	}
-	printf("\n");
+	printf("%s\n", output);
 }

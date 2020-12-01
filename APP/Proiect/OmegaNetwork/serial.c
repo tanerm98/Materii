@@ -21,7 +21,37 @@ void generate_possibilities(int *version, int io_pair) {
     }
 }
 
+void check_possibility(int *version, int io_pair) {
+	int shuffled_value;
+
+	int *input_values = (int*) malloc (N * sizeof(int));
+	int *shuffled_values = (int*) malloc (N * sizeof(int));
+	int *output_values;
+
+	memcpy(input_values, INPUT[io_pair], N * sizeof(int));
+
+	for (int level = 0; level < m; level++) {
+		for (int i = 0; i < N; i++) {
+			shuffled_value = shuffle(i);
+			shuffled_values[shuffled_value] = input_values[i];
+		}
+		free(input_values);
+
+		output_values = go_through_level(level * N / 2, shuffled_values, version);
+        input_values = output_values;
+	}
+
+	if (memcmp(output_values, OUTPUT[io_pair], N * sizeof(int)) == 0) {
+		found_result = 1;
+		print_output(version, io_pair);
+	}
+
+	free(shuffled_values);
+	free(output_values);
+}
+
 int main (int argc, char *argv[]) {
+	clock_t begin = clock();
 
 	open_input(argc, argv);
 	get_input();
@@ -39,6 +69,10 @@ int main (int argc, char *argv[]) {
 	}
 
 	free(version);
+
+	clock_t end = clock();
+    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("Total execution time = [%lf]\n", time_spent);
 
 	return 0;
 }

@@ -3,7 +3,7 @@ Compilare:
 	> make build
 
 Rulare un tip de paralelism:
-	> make run_<tip> [P=<nr_proc>]
+	> make run_<tip> [<input_file>] [P=<nr_proc>]
 
 Curatare:
 	> make clean
