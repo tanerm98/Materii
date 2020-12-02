@@ -1,5 +1,6 @@
 #include "header.h"
 #include <mpi.h>
+#include <omp.h>
 
 int P = 1;
 int rank;
@@ -65,7 +66,6 @@ void generate_possibilities_mpi(int *version, int io_pair, int *found_result) {
 }
 
 void generate_parallel_possibilities(int io_pair, int *found_result) {
-
 	if (nr_of_blocks == 1) {
         int version[1];
         for (int i = 0; i < BLOCK_TYPES_NR; i++) {
@@ -96,6 +96,7 @@ void generate_parallel_possibilities(int io_pair, int *found_result) {
 	int start = rank * (double)count / P;
     int end = fmin((rank + 1) * (double)count / P, count);
 
+    #pragma omp parallel for shared(found_result) num_threads(end - start)
     for (int i = start; i < end; i++) {
         int *version = (int*) malloc (nr_of_blocks * sizeof(int));
         memset (version, EMPTY, nr_of_blocks * sizeof(int));

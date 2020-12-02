@@ -3,7 +3,10 @@ Compilare:
 	> make build
 
 Rulare un tip de paralelism:
-	> make run_<tip> [<input_file>] [P=<nr_proc>]
+	> make run_<tip> [P=<nr_proc>]
+		<tip>: [serial, openmp, pthreads, mpi]
+		Ex: > make run_openmp P=8
+			> make run_mpi
 
 Curatare:
 	> make clean

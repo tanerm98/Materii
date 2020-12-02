@@ -54,7 +54,6 @@ void generate_possibilities_openmp(int *version, int io_pair, int *found_result)
 }
 
 void generate_parallel_possibilities(int io_pair, int *found_result) {
-
 	if (nr_of_blocks == 1) {
         int version[1];
         for (int i = 0; i < BLOCK_TYPES_NR; i++) {
