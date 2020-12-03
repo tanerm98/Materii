@@ -1,0 +1,4 @@
+Taner Mustafa - 341C1 - SPRC Lab 5 - MQTT
+
+pip install paho-mqtt
+python ex2.py
