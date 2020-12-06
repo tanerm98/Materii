@@ -25,31 +25,31 @@ Create database:
 	    USE meteo;
 
 	    CREATE TABLE IF NOT EXISTS tari(
-	        id int(5) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	        nume_tara varchar(50) UNIQUE,
-	        latitudine varchar(50),
-	        longitudine varchar(50)
-	    );
+            id INT(5) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            nume_tara varchar(50) UNIQUE,
+            latitudine DOUBLE(20,20),
+            longitudine DOUBLE(20,20)
+        );
 
 	    CREATE TABLE IF NOT EXISTS orase(
-	        id int(5) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	        id_tara int(5),
-	        nume_oras varchar(50),
-	        latitudine varchar(50),
-	        longitudine varchar(50),
+            id INT(5) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            id_tara INT(5),
+            nume_oras varchar(50),
+            latitudine DOUBLE(20,20),
+            longitudine DOUBLE(20,20),
 
-	        FOREIGN KEY (id_tara) REFERENCES tari(id),
-	        UNIQUE KEY unique_index (id_tara, nume_oras)
-	    );
+            FOREIGN KEY (id_tara) REFERENCES tari(id),
+            UNIQUE KEY unique_index (id_tara, nume_oras)
+        );
 
 	    CREATE TABLE IF NOT EXISTS temperaturi(
-	        id int(5) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	        id_oras int(5),
-	        valoare int(5),
-	        time_stamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            id INT(5) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            id_oras INT(5),
+            valoare INT(5),
+            time_stamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-	        FOREIGN KEY (id_oras) REFERENCES orase(id),
-	        UNIQUE KEY unique_index (id_oras, time_stamp)
-	    );
+            FOREIGN KEY (id_oras) REFERENCES orase(id),
+            UNIQUE KEY unique_index (id_oras, time_stamp)
+        );
 	"""
 
