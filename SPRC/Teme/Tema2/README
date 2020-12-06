@@ -1,25 +1,23 @@
 Taner Mustafa - 341C1 - SPRC - Tema 2
 
 Dockerfile
-docker build . -t task1
-docker run -it -p 8080:80 task1
+	> docker build . -t task1
+	> docker run -it -p 8080:80 task1
 
 YML
-docker-compose up
-docker-compose down
+	> docker-compose up
+	> docker-compose down
 
 Intrare in baza de date:
-> docker-compose up [--build]
-> docker-compose ps
-> docker-compose exec mysql_meteo_db bash
-	> mysql -u root -h mysql_meteo_db -p #1234
-	http://g2pc1.bu.edu/~qzpeng/manual/MySQL%20Commands.html
-		> show databases;
-		> use meteo;
-		> show tables;
-		> show columns from <table>;
-
-mysql -u root -h mysql_meteo_db -p
+	> docker-compose up [--build]
+	> docker-compose ps
+	> docker-compose exec mysql_meteo_db bash
+		> mysql -u root -h mysql_meteo_db -p #1234
+		http://g2pc1.bu.edu/~qzpeng/manual/MySQL%20Commands.html
+			> show databases;
+			> use meteo;
+			> show tables;
+			> show columns from <table>;
 
 Create database:
 	"""
