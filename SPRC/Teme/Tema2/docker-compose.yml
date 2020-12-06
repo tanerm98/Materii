@@ -1,0 +1,23 @@
+version: '3.3'
+
+services:
+  mysql_meteo_db:
+    image: mysql:5.7
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: meteo
+      MYSQL_USER: taner
+      MYSQL_PASSWORD: taner1234
+    ports:
+      - "3306:3306"
+
+  meteo-py:
+    build: .
+    depends_on:
+      - mysql_meteo_db
+
+volumes:
+  db_data: {}
