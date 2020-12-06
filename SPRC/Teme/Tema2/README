@@ -8,6 +8,9 @@ YML
 	> docker-compose up
 	> docker-compose down
 
+Volumes:
+	> docker volume [ls/rm <name/id>]
+
 Intrare in baza de date:
 	> docker-compose up [--build]
 	> docker-compose ps
@@ -27,16 +30,16 @@ Create database:
 	    CREATE TABLE IF NOT EXISTS tari(
             id INT(5) NOT NULL AUTO_INCREMENT PRIMARY KEY,
             nume_tara varchar(50) UNIQUE,
-            latitudine DOUBLE(20,20),
-            longitudine DOUBLE(20,20)
+            latitudine DOUBLE,
+            longitudine DOUBLE
         );
 
 	    CREATE TABLE IF NOT EXISTS orase(
             id INT(5) NOT NULL AUTO_INCREMENT PRIMARY KEY,
             id_tara INT(5),
             nume_oras varchar(50),
-            latitudine DOUBLE(20,20),
-            longitudine DOUBLE(20,20),
+            latitudine DOUBLE,
+            longitudine DOUBLE,
 
             FOREIGN KEY (id_tara) REFERENCES tari(id),
             UNIQUE KEY unique_index (id_tara, nume_oras)
