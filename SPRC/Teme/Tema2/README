@@ -13,7 +13,7 @@ Intrare in baza de date:
 > docker-compose ps
 > docker-compose exec mysql_meteo_db bash
 	> mysql -u root -h mysql_meteo_db -p #1234
-	http://g2pc1.bu.edu/~qzpeng/manual/MySQL%20Commands.htm
+	http://g2pc1.bu.edu/~qzpeng/manual/MySQL%20Commands.html
 		> show databases;
 		> use meteo;
 		> show tables;
