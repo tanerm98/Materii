@@ -213,6 +213,100 @@ def delete_country(id):
     )
     return response
 
+@app.route("/api/cities", methods=["POST"])
+def add_city():
+    global tari, orase
+    global connection
+
+    payload = request.get_json()
+    if not payload:
+        return Response(status=400)
+    try:
+        idtara = payload[IDTARA]
+        nume = payload[NUME]
+        lat = payload[LAT]
+        lon = payload[LON]
+
+        int(idtara)
+        int(lat)
+        int(lon)
+        if str(nume) == 0:
+            raise
+    except:
+        return Response(status=400)
+
+    try:
+        query = db.select([tari]).where(tari.columns.id == idtara)
+        results = connection.execute(query).fetchall()
+        if results == []:
+            raise
+
+        query = db.insert(orase).values(id_tara=idtara, nume_oras=nume, latitudine=lat, longitudine=lon)
+        connection.execute(query)
+    except:
+        return Response(status=409)
+
+    last_insert = connection.execute(db.select([orase])).fetchall()
+    id_oras = int(last_insert[-1].id)
+
+    response = app.response_class(
+        response=json.dumps({"id": id_oras}),
+        status=201,
+        mimetype='application/json'
+    )
+    return response
+
+@app.route("/api/cities", methods=["GET"])
+def get_cities():
+    global tari, orase
+    global connection
+
+    query = db.select([orase])
+    result = connection.execute(query).fetchall()
+
+    response_data = []
+    for (id_oras, id_tara, nume_oras, latitudine, longitudine) in result:
+        data = {
+            ID: int(id_oras),
+            IDTARA: int(id_tara),
+            NUME: nume_oras,
+            LAT: float(latitudine),
+            LON: float(longitudine)
+        }
+        response_data.append(data)
+
+    response = app.response_class(
+        response=json.dumps(response_data),
+        status=200,
+        mimetype='application/json'
+    )
+    return response
+
+@app.route("/api/cities/country/<int:idTara>", methods=["GET"])
+def get_cities_by_country(idTara):
+    global tari, orase
+    global connection
+
+    query = db.select([orase]).where(orase.columns.id_tara == idTara)
+    result = connection.execute(query).fetchall()
+
+    response_data = []
+    for (id_oras, id_tara, nume_oras, latitudine, longitudine) in result:
+        data = {
+            ID: int(id_oras),
+            NUME: nume_oras,
+            LAT: float(latitudine),
+            LON: float(longitudine)
+        }
+        response_data.append(data)
+
+    response = app.response_class(
+        response=json.dumps(response_data),
+        status=200,
+        mimetype='application/json'
+    )
+    return response
+
 def main():
     connect_to_db()
     create_db()
