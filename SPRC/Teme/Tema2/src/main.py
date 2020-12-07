@@ -3,6 +3,9 @@ import pandas as pd
 import json
 from flask import Flask
 from flask import request, jsonify, Response
+import logging
+
+logging.getLogger().setLevel(logging.INFO)
 
 app = Flask(__name__)
 
@@ -122,11 +125,37 @@ def req1():
     )
     return response
 
+@app.route("/api/countries", methods=["GET"])
+def req2():
+    global tari
+    global connection
+
+    query = db.select([tari])
+    result = connection.execute(query).fetchall()
+
+    response_data = []
+    for element in result:
+        logging.info(element)
+        data = {
+            ID: int(element[0]),
+            NUME: element[1],
+            LAT: float(element[2]),
+            LON: float(element[3])
+        }
+        response_data.append(data)
+
+    logging.info(response_data)
+
+    response = app.response_class(
+        response=json.dumps(response_data),
+        status=200,
+        mimetype='application/json'
+    )
+    return response
+
 def main():
     connect_to_db()
     create_db()
-
-    print(repr(metadata.tables['orase']))
 
 if __name__ == "__main__":
     main()
