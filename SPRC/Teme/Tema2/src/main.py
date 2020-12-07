@@ -90,7 +90,7 @@ def create_db():
     temperaturi = db.Table('temperaturi', metadata, autoload=True, autoload_with=engine)
 
 @app.route("/api/countries", methods=["POST"])
-def req1():
+def add_country():
     global tari
     global connection
 
@@ -126,7 +126,7 @@ def req1():
     return response
 
 @app.route("/api/countries", methods=["GET"])
-def req2():
+def get_countries():
     global tari
     global connection
 
@@ -134,20 +134,80 @@ def req2():
     result = connection.execute(query).fetchall()
 
     response_data = []
-    for element in result:
-        logging.info(element)
+    for (id, nume, latitudine, longitudine) in result:
         data = {
-            ID: int(element[0]),
-            NUME: element[1],
-            LAT: float(element[2]),
-            LON: float(element[3])
+            ID: int(id),
+            NUME: nume,
+            LAT: float(latitudine),
+            LON: float(longitudine)
         }
         response_data.append(data)
 
-    logging.info(response_data)
-
     response = app.response_class(
         response=json.dumps(response_data),
+        status=200,
+        mimetype='application/json'
+    )
+    return response
+
+@app.route("/api/countries/<int:id>", methods=["PUT"])
+def update_country(id):
+    global tari
+    global connection
+
+    payload = request.get_json()
+    if not payload:
+        return Response(status=400)
+    try:
+        idp = payload[ID]
+        nume = payload[NUME]
+        lat = payload[LAT]
+        lon = payload[LON]
+
+        int(id)
+        int(lat)
+        int(lon)
+        assert id == idp
+        if str(nume) == 0:
+            raise
+    except:
+        return Response(status=400)
+
+    try:
+        query = db.select([tari]).where(tari.columns.id == id)
+        results = connection.execute(query).fetchall()
+        if results == []:
+            raise
+
+        query = db.update(tari).values(nume_tara=nume, latitudine=lat, longitudine=lon)
+        query = query.where(tari.columns.id == id)
+        connection.execute(query)
+    except:
+        return Response(status=404)
+
+    response = app.response_class(
+        status=200,
+        mimetype='application/json'
+    )
+    return response
+
+@app.route("/api/countries/<int:id>", methods=["DELETE"])
+def delete_country(id):
+    global tari
+    global connection, engine
+
+    try:
+        query = db.select([tari]).where(tari.columns.id == id)
+        results = connection.execute(query).fetchall()
+        if results == []:
+            raise
+
+        query = db.delete(tari).where(tari.columns.id == id)
+        connection.execute(query)
+    except:
+        return Response(status=404)
+
+    response = app.response_class(
         status=200,
         mimetype='application/json'
     )
