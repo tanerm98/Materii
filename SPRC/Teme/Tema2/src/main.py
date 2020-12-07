@@ -350,6 +350,28 @@ def update_city(id):
     )
     return response
 
+@app.route("/api/cities/<int:id>", methods=["DELETE"])
+def delete_city(id):
+    global orase
+    global connection, engine
+
+    try:
+        query = db.select([orase]).where(orase.columns.id == id)
+        results = connection.execute(query).fetchall()
+        if results == []:
+            raise
+
+        query = db.delete(orase).where(orase.columns.id == id)
+        connection.execute(query)
+    except:
+        return Response(status=404)
+
+    response = app.response_class(
+        status=200,
+        mimetype='application/json'
+    )
+    return response
+
 def main():
     connect_to_db()
     create_db()
