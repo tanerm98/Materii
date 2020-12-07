@@ -232,15 +232,15 @@ def add_city():
         int(lon)
         if str(nume) == 0:
             raise
-    except:
-        return Response(status=400)
 
-    try:
         query = db.select([tari]).where(tari.columns.id == idtara)
         results = connection.execute(query).fetchall()
         if results == []:
             raise
+    except:
+        return Response(status=400)
 
+    try:
         query = db.insert(orase).values(id_tara=idtara, nume_oras=nume, latitudine=lat, longitudine=lon)
         connection.execute(query)
     except:
@@ -284,7 +284,7 @@ def get_cities():
 
 @app.route("/api/cities/country/<int:idTara>", methods=["GET"])
 def get_cities_by_country(idTara):
-    global tari, orase
+    global orase
     global connection
 
     query = db.select([orase]).where(orase.columns.id_tara == idTara)
@@ -302,6 +302,49 @@ def get_cities_by_country(idTara):
 
     response = app.response_class(
         response=json.dumps(response_data),
+        status=200,
+        mimetype='application/json'
+    )
+    return response
+
+@app.route("/api/cities/<int:id>", methods=["PUT"])
+def update_city(id):
+    global tari, orase
+    global connection
+
+    payload = request.get_json()
+    if not payload:
+        return Response(status=400)
+    try:
+        idp = payload[ID]
+        idtara = payload[IDTARA]
+        nume = payload[NUME]
+        lat = payload[LAT]
+        lon = payload[LON]
+
+        int(idp)
+        int(idtara)
+        int(lat)
+        int(lon)
+        assert idp == id
+        if str(nume) == 0:
+            raise
+
+        query = db.select([tari]).where(tari.columns.id == idtara)
+        results = connection.execute(query).fetchall()
+        if results == []:
+            raise
+    except:
+        return Response(status=400)
+
+    try:
+        query = db.update(orase).values(id_tara=idtara, nume_oras=nume, latitudine=lat, longitudine=lon)
+        query = query.where(orase.columns.id == id)
+        connection.execute(query)
+    except:
+        return Response(status=404)
+
+    response = app.response_class(
         status=200,
         mimetype='application/json'
     )
