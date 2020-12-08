@@ -6,6 +6,7 @@ from flask import request, jsonify, Response
 import logging
 from datetime import datetime
 from time import sleep
+import os
 
 logging.getLogger().setLevel(logging.INFO)
 
@@ -40,8 +41,20 @@ def connect_to_db():
     success = False
     while not success:
         try:
+            mysql_service = os.environ.get('MYSQL_SERVICE')
+            username = os.environ.get('MYSQL_ROOT_USER')
+            password = os.environ.get('MYSQL_ROOT_PASSWORD')
+            database = os.environ.get('MYSQL_DATABASE')
+            port = os.environ.get('MYSQL_PORT')
+
             logging.info("Connecting to MySQL database...")
-            mysql_conn_str = "mysql+pymysql://root:1234@mysql_meteo_db:3306/meteo"
+            mysql_conn_str = "mysql+pymysql://{username}:{password}@{mysql_service}:{port}/{database}".format(
+                username=username,
+                password=password,
+                mysql_service=mysql_service,
+                port=port,
+                database=database
+            )
             engine = db.create_engine(mysql_conn_str)
             connection = engine.connect()
             metadata = db.MetaData()
