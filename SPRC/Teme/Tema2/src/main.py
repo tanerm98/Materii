@@ -74,7 +74,7 @@ def create_db():
     CREATE TABLE IF NOT EXISTS temperaturi(
         id INT(5) NOT NULL AUTO_INCREMENT PRIMARY KEY,
         id_oras INT(5) NOT NULL,
-        valoare INT(5) NOT NULL,
+        valoare DOUBLE NOT NULL,
         time_stamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         
         FOREIGN KEY (id_oras) REFERENCES orase(id) ON DELETE CASCADE,
@@ -371,6 +371,84 @@ def delete_city(id):
         mimetype='application/json'
     )
     return response
+
+@app.route("/api/temperatures", methods=["POST"])
+def add_temperature():
+    global temperaturi, orase
+    global connection
+
+    payload = request.get_json()
+    if not payload:
+        return Response(status=400)
+    try:
+        idoras = payload[IDORAS]
+        valoare = payload[VALOARE]
+
+        int(idoras)
+        int(valoare)
+
+        query = db.select([orase]).where(orase.columns.id == idoras)
+        results = connection.execute(query).fetchall()
+        if results == []:
+            raise
+    except:
+        return Response(status=400)
+
+    try:
+        query = db.insert(temperaturi).values(id_oras=idoras, valoare=valoare)
+        connection.execute(query)
+    except:
+        return Response(status=409)
+
+    last_insert = connection.execute(db.select([temperaturi])).fetchall()
+    id_temp = int(last_insert[-1].id)
+
+    response = app.response_class(
+        response=json.dumps({"id": id_temp}),
+        status=201,
+        mimetype='application/json'
+    )
+    return response
+
+@app.route("/api/temperatures/<int:id>", methods=["PUT"])
+def update_temperature(id):
+    return Response(200)
+    # global temperaturi, orase
+    # global connection
+    #
+    # payload = request.get_json()
+    # if not payload:
+    #     return Response(status=400)
+    # try:
+    #     idtemp = payload[ID]
+    #     idoras = payload[IDORAS]
+    #     valoare = payload[VALOARE]
+    #
+    #     int(idtemp)
+    #     int(idoras)
+    #     int(valoare)
+    #
+    #     assert(id == idtemp)
+    #
+    #     query = db.select([orase]).where(orase.columns.id == idoras)
+    #     results = connection.execute(query).fetchall()
+    #     if results == []:
+    #         raise
+    # except:
+    #     return Response(status=400)
+    #
+    # try:
+    #     query = db.update(temperaturi).values(id_oras=idoras, valoare=valoare)
+    #     query = query.where(temperaturi.columns.id == id)
+    #     connection.execute(query)
+    # except:
+    #     return Response(status=404)
+    #
+    # response = app.response_class(
+    #     status=200,
+    #     mimetype='application/json'
+    # )
+    # return response
 
 def main():
     connect_to_db()
