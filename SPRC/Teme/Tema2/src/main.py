@@ -412,43 +412,64 @@ def add_temperature():
 
 @app.route("/api/temperatures/<int:id>", methods=["PUT"])
 def update_temperature(id):
-    return Response(200)
-    # global temperaturi, orase
-    # global connection
-    #
-    # payload = request.get_json()
-    # if not payload:
-    #     return Response(status=400)
-    # try:
-    #     idtemp = payload[ID]
-    #     idoras = payload[IDORAS]
-    #     valoare = payload[VALOARE]
-    #
-    #     int(idtemp)
-    #     int(idoras)
-    #     int(valoare)
-    #
-    #     assert(id == idtemp)
-    #
-    #     query = db.select([orase]).where(orase.columns.id == idoras)
-    #     results = connection.execute(query).fetchall()
-    #     if results == []:
-    #         raise
-    # except:
-    #     return Response(status=400)
-    #
-    # try:
-    #     query = db.update(temperaturi).values(id_oras=idoras, valoare=valoare)
-    #     query = query.where(temperaturi.columns.id == id)
-    #     connection.execute(query)
-    # except:
-    #     return Response(status=404)
-    #
-    # response = app.response_class(
-    #     status=200,
-    #     mimetype='application/json'
-    # )
-    # return response
+    global temperaturi, orase
+    global connection
+
+    payload = request.get_json()
+    if not payload:
+        return Response(status=400)
+    try:
+        idtemp = payload[ID]
+        idoras = payload[IDORAS]
+        valoare = payload[VALOARE]
+
+        int(idtemp)
+        int(idoras)
+        int(valoare)
+
+        assert(id == idtemp)
+
+        query = db.select([orase]).where(orase.columns.id == idoras)
+        results = connection.execute(query).fetchall()
+        if results == []:
+            raise
+    except:
+        return Response(status=400)
+
+    try:
+        query = db.update(temperaturi).values(id_oras=idoras, valoare=valoare)
+        query = query.where(temperaturi.columns.id == id)
+        connection.execute(query)
+    except:
+        return Response(status=404)
+
+    response = app.response_class(
+        status=200,
+        mimetype='application/json'
+    )
+    return response
+
+@app.route("/api/temperatures/<int:id>", methods=["DELETE"])
+def delete_temperature(id):
+    global temperaturi
+    global connection, engine
+
+    try:
+        query = db.select([temperaturi]).where(temperaturi.columns.id == id)
+        results = connection.execute(query).fetchall()
+        if results == []:
+            raise
+
+        query = db.delete(temperaturi).where(temperaturi.columns.id == id)
+        connection.execute(query)
+    except:
+        return Response(status=404)
+
+    response = app.response_class(
+        status=200,
+        mimetype='application/json'
+    )
+    return response
 
 def main():
     connect_to_db()
