@@ -598,6 +598,62 @@ def req2(idOras):
     )
     return response
 
+@app.route("/api/temperatures/countries//<int:idTara>", methods=["GET"])
+def req3(idTara):
+    global temperaturi, orase, tari
+    global connection, engine
+
+    from_ = request.args.get(FROM)
+    until = request.args.get(UNTIL)
+
+    from_datetime_string = None
+    until_datetime_string = None
+
+    response_data = []
+
+    try:
+        int(idTara)
+
+        if from_ is not None:
+            from_datetime_string = datetime.strptime(from_, '%Y-%m-%d').strftime("%Y-%m-%d")
+        if until is not None:
+            until_datetime_string = datetime.strptime(until, '%Y-%m-%d').strftime("%Y-%m-%d")
+
+        results = connection.execute(db.select([temperaturi])).fetchall()
+
+        for element in results:
+            (id_temp, id_oras, valoare, time_stamp) = element
+            date_time_string = time_stamp.strftime("%Y-%m-%d")
+
+            if from_datetime_string is not None:
+                if from_datetime_string > date_time_string:
+                    continue
+            if until_datetime_string is not None:
+                if until_datetime_string < date_time_string:
+                    continue
+
+            query = db.select([orase]).where(orase.columns.id == id_oras)
+            cities = connection.execute(query).fetchall()
+            id_tara = cities[0][1]
+            if id_tara != idTara:
+                continue
+
+            response_data.append({
+                ID: int(id_temp),
+                VALOARE: float(valoare),
+                TIMESTAMP: date_time_string
+            })
+
+    except Exception as e:
+        logging.info(e)
+
+    response = app.response_class(
+        response=json.dumps(response_data),
+        status=200,
+        mimetype='application/json'
+    )
+    return response
+
 def main():
     connect_to_db()
     create_db()
