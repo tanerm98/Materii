@@ -4,6 +4,7 @@ import json
 from flask import Flask
 from flask import request, jsonify, Response
 import logging
+from datetime import datetime
 
 logging.getLogger().setLevel(logging.INFO)
 
@@ -20,6 +21,8 @@ IDTARA = "idTara"
 IDORAS = "idOras"
 VALOARE = "valoare"
 TIMESTAMP = "timestamp"
+FROM = "from"
+UNTIL = "until"
 
 NUME_TARA = "nume_tara"
 LATITUDINE = "latitudine"
@@ -102,8 +105,8 @@ def add_country():
         lat = payload[LAT]
         lon = payload[LON]
 
-        int(lat)
-        int(lon)
+        float(lat)
+        float(lon)
         if str(nume) == 0:
             raise
     except:
@@ -165,8 +168,8 @@ def update_country(id):
         lon = payload[LON]
 
         int(id)
-        int(lat)
-        int(lon)
+        float(lat)
+        float(lon)
         assert id == idp
         if str(nume) == 0:
             raise
@@ -228,8 +231,8 @@ def add_city():
         lon = payload[LON]
 
         int(idtara)
-        int(lat)
-        int(lon)
+        float(lat)
+        float(lon)
         if str(nume) == 0:
             raise
 
@@ -324,8 +327,8 @@ def update_city(id):
 
         int(idp)
         int(idtara)
-        int(lat)
-        int(lon)
+        float(lat)
+        float(lon)
         assert idp == id
         if str(nume) == 0:
             raise
@@ -385,7 +388,7 @@ def add_temperature():
         valoare = payload[VALOARE]
 
         int(idoras)
-        int(valoare)
+        float(valoare)
 
         query = db.select([orase]).where(orase.columns.id == idoras)
         results = connection.execute(query).fetchall()
@@ -425,7 +428,7 @@ def update_temperature(id):
 
         int(idtemp)
         int(idoras)
-        int(valoare)
+        float(valoare)
 
         assert(id == idtemp)
 
@@ -470,6 +473,150 @@ def delete_temperature(id):
         mimetype='application/json'
     )
     return response
+
+@app.route("/api/temperatures", methods=["GET"])
+def req1():
+    global temperaturi, orase, tari
+    global connection, engine
+
+    lat = request.args.get(LAT)
+    lon = request.args.get(LON)
+    from_ = request.args.get(FROM)
+    until = request.args.get(UNTIL)
+
+    from_datetime_string = None
+    until_datetime_string = None
+
+    response_data = []
+
+    try:
+        if lat is not None:
+            float(lat)
+        if lon is not None:
+            float(lon)
+
+        if from_ is not None:
+            from_datetime_string = datetime.strptime(from_, '%Y-%m-%d').strftime("%Y-%m-%d")
+        if until is not None:
+            until_datetime_string = datetime.strptime(until, '%Y-%m-%d').strftime("%Y-%m-%d")
+
+        results = connection.execute(db.select([temperaturi])).fetchall()
+
+        for element in results:
+            (id_temp, id_oras, valoare, time_stamp) = element
+            date_time_string = time_stamp.strftime("%Y-%m-%d")
+
+            if from_datetime_string is not None:
+                if from_datetime_string > date_time_string:
+                    continue
+            if until_datetime_string is not None:
+                if until_datetime_string < date_time_string:
+                    continue
+
+            cities_lat = None
+            if lat is not None:
+                query = db.select([orase]).where(orase.columns.latitudine == lat)
+                cities_lat = connection.execute(query).fetchall()
+                if cities_lat == []:
+                    continue
+
+            if lon is not None:
+                query = db.select([orase]).where(orase.columns.longitudine == lon)
+                cities_lon = connection.execute(query).fetchall()
+                if cities_lon == []:
+                    continue
+                if cities_lat is not None:
+                    lat_lon_city = [value for value in cities_lat if value in cities_lon]
+                    if lat_lon_city == []:
+                        continue
+
+            response_data.append({
+                ID: int(id_temp),
+                VALOARE: float(valoare),
+                TIMESTAMP: date_time_string
+            })
+
+    except Exception as e:
+        logging.info(e)
+
+    response = app.response_class(
+        response=json.dumps(response_data),
+        status=200,
+        mimetype='application/json'
+    )
+    return response
+
+# @app.route("/api/temperatures/cities/<int:id>", methods=["GET"])
+# def req2():
+#     global temperaturi, orase, tari
+#     global connection, engine
+#
+#     lat = request.args.get(LAT)
+#     lon = request.args.get(LON)
+#     from_ = request.args.get(FROM)
+#     until = request.args.get(UNTIL)
+#
+#     from_datetime_string = None
+#     until_datetime_string = None
+#
+#     response_data = []
+#
+#     try:
+#         if lat is not None:
+#             float(lat)
+#         if lon is not None:
+#             float(lon)
+#
+#         if from_ is not None:
+#             from_datetime_string = datetime.strptime(from_, '%Y-%m-%d').strftime("%Y-%m-%d")
+#         if until is not None:
+#             until_datetime_string = datetime.strptime(until, '%Y-%m-%d').strftime("%Y-%m-%d")
+#
+#         results = connection.execute(db.select([temperaturi])).fetchall()
+#
+#         for element in results:
+#             (id_temp, id_oras, valoare, time_stamp) = element
+#             date_time_string = time_stamp.strftime("%Y-%m-%d")
+#
+#             if from_datetime_string is not None:
+#                 if from_datetime_string > date_time_string:
+#                     continue
+#             if until_datetime_string is not None:
+#                 if until_datetime_string < date_time_string:
+#                     continue
+#
+#             cities_lat = None
+#             if lat is not None:
+#                 query = db.select([orase]).where(orase.columns.latitudine == lat)
+#                 cities_lat = connection.execute(query).fetchall()
+#                 if cities_lat == []:
+#                     continue
+#
+#             if lon is not None:
+#                 query = db.select([orase]).where(orase.columns.longitudine == lon)
+#                 cities_lon = connection.execute(query).fetchall()
+#                 if cities_lon == []:
+#                     continue
+#                 if cities_lat is not None:
+#                     lat_lon_city = [value for value in cities_lat if value in cities_lon]
+#                     if lat_lon_city == []:
+#                         continue
+#
+#             response_data.append({
+#                 ID: int(id_temp),
+#                 VALOARE: float(valoare),
+#                 TIMESTAMP: date_time_string
+#             })
+#
+#     except Exception as e:
+#         logging.info(e)
+#
+#     response = app.response_class(
+#         response=json.dumps(response_data),
+#         status=200,
+#         mimetype='application/json'
+#     )
+#     return response
 
 def main():
     connect_to_db()
