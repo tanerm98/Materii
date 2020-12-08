@@ -5,6 +5,7 @@ from flask import Flask
 from flask import request, jsonify, Response
 import logging
 from datetime import datetime
+from time import sleep
 
 logging.getLogger().setLevel(logging.INFO)
 
@@ -36,12 +37,19 @@ TIME_STAMP = "time_stamp"
 def connect_to_db():
     global engine, connection, metadata
 
-    print("Connecting to MySQL database...")
-    mysql_conn_str = "mysql+pymysql://root:1234@mysql_meteo_db:3306/meteo"
-    engine = db.create_engine(mysql_conn_str)
-    connection = engine.connect()
-    metadata = db.MetaData()
-    print("Connection successful!")
+    success = False
+    while not success:
+        try:
+            logging.info("Connecting to MySQL database...")
+            mysql_conn_str = "mysql+pymysql://root:1234@mysql_meteo_db:3306/meteo"
+            engine = db.create_engine(mysql_conn_str)
+            connection = engine.connect()
+            metadata = db.MetaData()
+            logging.info("Connection successful!")
+            success = True
+        except:
+            logging.info("Could not connect. Trying again in 10 seconds...")
+            sleep(10)
 
 def create_db():
     global engine, connection, metadata

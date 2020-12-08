@@ -1,0 +1,11 @@
+.git
+.gitignore
+src/*pyc
+*.pyc
+*/*.pyc
+*/*/*.pyc
+README
+modules
+modules*
+modules/*
+**/modules
