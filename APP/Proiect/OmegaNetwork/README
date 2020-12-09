@@ -8,5 +8,11 @@ Rulare un tip de paralelism:
 		Ex: > make run_openmp P=8
 			> make run_mpi
 
+Rulare toate tipurile de paralelism cu numar de procesoare 'nr_de_procesoare_dorit':
+	> make run_all P=nr_de_procesoare_dorit
+
+Rulare toate tipurile de paralelism pe 1, 2, 4, 8 si 16 procesoare:
+	> make run_all_tests
+
 Curatare:
 	> make clean

@@ -96,7 +96,11 @@ void generate_parallel_possibilities(int io_pair, int *found_result) {
 	int start = rank * (double)count / P;
     int end = fmin((rank + 1) * (double)count / P, count);
 
-    #pragma omp parallel for shared(found_result) num_threads(end - start)
+	int P_ = P;
+	if (P == 1) {
+		P_ = 2;
+	}
+    #pragma omp parallel for shared(found_result) num_threads(P_)
     for (int i = start; i < end; i++) {
         int *version = (int*) malloc (nr_of_blocks * sizeof(int));
         memset (version, EMPTY, nr_of_blocks * sizeof(int));
