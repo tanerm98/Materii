@@ -21,11 +21,11 @@
 		- se genereaza toate designurile posibile de Omega Network
 		- pentru fiecare posibilitate, se ruleaza pe intrari si se verifica daca s-a ajuns la valorile de output dorite
 	- tipuri de paralelizari implementate:
-		- serial - `serial.c`
-		- OpenMp - `openmp.c`
-		- PThreads - `pthreads.c`
-		- MPI - `mpi.c`
-		- Hybrid - MPI & OpenMP - `hybrid.c`
+		- serial
+		- OpenMp
+		- PThreads
+		- MPI
+		- Hybrid - MPI & OpenMP
 			- pentru fiecare tip de paralelizare, se imparte in mod egal numarul de posibilitati de design fiecarui
 			procespr, pentru a fi testata fiecare posibilitate in parte.
 			- varianta hibrida ruleaza cel mai bine cand fiecare `nod` ruleaza pe o masina diferita - in fiecare `nod`,
