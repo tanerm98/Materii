@@ -1,3 +1,0 @@
-
-Compilare:
- - gcc omega.c -o omega
