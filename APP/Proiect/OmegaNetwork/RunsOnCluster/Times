@@ -3,7 +3,7 @@ ibm-nehalem.q - 16 sloturi rezervate
 * Timpi de rulare per metoda de paralelizare si numar de procesoare:
 						P = 1	    P = 2	    P = 4	    P = 8       P = 16
 Serial	                28.26	    28.26	    28.26	    28.26       28.26
-OpenMP	                16.48	    5.11	    2.2	        0.93        0.93
-PThreads	            16.68	    5.16	    2.42	    1.21        1.21
-MPI	                    16.31	    11.26	    6.69	    5.78        5.78
+OpenMP	                28.00	    15.44	    6.67        1.88        2.50
+PThreads	            31.08	    9.12	    3.73	    1.06        1.09
+MPI	                    32.52	    22.82	    17.09	    11.17       5.35
 Hybrid - MPI & OpenMP	5.55	    7.31	    6.53	    5.84        5.84
