@@ -4,6 +4,7 @@
 #qstat
 
 #qsub -q ibm-nehalem.q -pe openmpi 16 -cwd ./run.sh
-#qst
+#qstat
 
 qsub -q ibm-nehalem.q -pe openmpi*16 16 -cwd ./run.sh
+qstat
