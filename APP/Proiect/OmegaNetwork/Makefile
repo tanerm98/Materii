@@ -2,7 +2,7 @@
 
 build:
 	gcc serial.c -o serial -lm
-	gcc-9 openmp.c -o openmp -fopenmp -fdump-tree-all -lm
+	gcc openmp.c -o openmp -fopenmp -fdump-tree-all -lm
 	gcc pthreads.c -o pthreads -lm -lpthread
 	mpicc -o mpi mpi.c -lm
 	mpicc -o hybrid hybrid.c -fopenmp -fdump-tree-all -lm
