@@ -1,3 +1,2 @@
-rm run.sh.e.*
-rm run.sh.o.*
+rm run.sh.*
 make clean
