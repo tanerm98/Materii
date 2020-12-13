@@ -1,7 +1,7 @@
 #!/bin/bash
 
-qsub -q all.q -cwd ./run.sh
+qsub -q ibm-nehalem.q -cwd ./run.sh
 qstat
 
-#qsub -q all-8.q -pe openmpi 45 -cwd ./run.sh
+#qsub -q ibm-nehalem.q -pe openmpi 16 -cwd ./run.sh
 #qstat
