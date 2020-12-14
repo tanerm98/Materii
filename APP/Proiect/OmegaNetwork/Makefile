@@ -1,11 +1,11 @@
 #!/bin/bash
 
 build:
-	gcc serial.c -o serial -lm
-	gcc openmp.c -o openmp -fopenmp -fdump-tree-all -lm
-	gcc pthreads.c -o pthreads -lm -lpthread
-	mpicc -o mpi mpi.c -lm
-	mpicc -o hybrid hybrid.c -fopenmp -fdump-tree-all -lm
+	gcc -g serial.c -o serial -lm
+	gcc -g openmp.c -o openmp -fopenmp -fdump-tree-all -lm
+	gcc -g pthreads.c -o pthreads -lm -lpthread
+	mpicc -g -o mpi mpi.c -lm
+	mpicc -g -o hybrid hybrid.c -fopenmp -fdump-tree-all -lm
 	mkdir OUTPUT
 
 run_all_tests:
