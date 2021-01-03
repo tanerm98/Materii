@@ -36,12 +36,7 @@ Curatare:
 		- MPI
 		- Hybrid - MPI & OpenMP
 			- pentru fiecare tip de paralelizare, se imparte in mod egal numarul de posibilitati de design fiecarui
-			procesor, pentru a fi testata fiecare posibilitate in parte.
-			- varianta hibrida ruleaza cel mai bine cand fiecare `nod` ruleaza pe o masina diferita - in fiecare `nod`,
-			cu OpenMP se mai genereaza fire aditionale de executie, care impart si mai mult posibilitatile.
-		- Hybrid - MPI & PThreads
-			- Fiecare proces MPI alege cate o pereche din input, iar fiecare proces PThread imparte munca pentru
-			rezolvarea perechii.
+			procespr, pentru a fi testata fiecare posibilitate in parte.
 			- varianta hibrida ruleaza cel mai bine cand fiecare `nod` ruleaza pe o masina diferita - in fiecare `nod`,
 			cu OpenMP se mai genereaza fire aditionale de executie, care impart si mai mult posibilitatile.
 
@@ -53,4 +48,3 @@ OpenMP	                16.48	    5.11	    2.2	        0.93
 PThreads	            16.68	    5.16	    2.42	    1.21
 MPI	                    16.31	    11.26	    6.69	    5.78
 Hybrid - MPI & OpenMP	5.55	    7.31	    6.53	    5.84
-Hybrid - MPI & PThreads	31.12	    1.43	    3.84	    8.77
