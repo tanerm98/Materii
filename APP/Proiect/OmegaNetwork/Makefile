@@ -6,6 +6,7 @@ build:
 	gcc -g pthreads.c -o pthreads -lm -lpthread
 	mpicc -g -o mpi mpi.c -lm
 	mpicc -g -o hybrid hybrid.c -fopenmp -fdump-tree-all -lm
+	mpicc -g -o hybrid2 hybrid2.c -lm -lpthread
 	mkdir OUTPUT
 
 run_all_tests:
@@ -21,6 +22,7 @@ run_all:
 	make run_pthreads
 	make run_mpi
 	make run_hybrid
+	make run_hybrid2
 
 run_serial:
 	time ./serial input > OUTPUT/output_serial
@@ -37,7 +39,10 @@ run_mpi:
 run_hybrid:
 	time mpirun -np $(P) ./hybrid input > OUTPUT/output_hybrid_$(P)
 
+run_hybrid2:
+	time mpirun -np $(P) ./hybrid2 input > OUTPUT/output_hybrid2_$(P)
+
 clean:
-	rm serial openmp pthreads mpi hybrid || echo "Continuing..."
+	rm serial openmp pthreads mpi hybrid hybrid2 || echo "Continuing..."
 	rm -r OUTPUT || echo "Continuing..."
 	rm openmp.c.* hybrid.c.* || echo "Continuing..."
