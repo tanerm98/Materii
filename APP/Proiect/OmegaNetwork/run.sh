@@ -25,3 +25,9 @@ time mpirun -np 2 ./hybrid input
 time mpirun -np 4 ./hybrid input
 time mpirun -np 8 ./hybrid input
 time mpirun -np 16 ./hybrid input
+
+time mpirun -np 1 ./hybrid2 input
+time mpirun -np 2 ./hybrid2 input
+time mpirun -np 4 ./hybrid2 input
+time mpirun -np 8 ./hybrid2 input
+time mpirun -np 16 ./hybrid2 input
