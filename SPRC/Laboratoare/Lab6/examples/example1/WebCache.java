@@ -65,11 +65,14 @@ public class WebCache {
 	public String requestURL(String url) {
 		// stergem in mod automat intrarile prea vechi a mai fi valabile
 		purgeOldPages();
-		if (cache.containsKey(url)) { // daca deja avem in cache continutul 
+		if (cache.containsKey(url)) { // daca deja avem in cache continutul
+            ((WebCacheEntry)cache.get(url)).accessEntry();
+            System.out.println("HIT " + ((WebCacheEntry)cache.get(url)).timesUsed + ":");
 			return ((WebCacheEntry)cache.get(url)).getContent(); // atunci returnam valoarea din memorie
 		}
 		// altfel facem o interogare a adresei pentru continutul fresh al paginii web
-		String content = getWebPage(url);
+        System.out.println("MISS:");
+        String content = getWebPage(url);
 		if (content == null) // daca interogarea a esuat 
 			return content;
 		// formam o noua intrare cache
@@ -83,15 +86,23 @@ public class WebCache {
 		if (maxSizeOnDisk > 0l) {
 			long sizeOnDisk = cacheFile.getSizeOnDisk();
 			while (sizeOnDisk > maxSizeOnDisk) { // cat timp am depasit mai stergem intrari
-				// remove the oldest accessed entry ...
+				// remove the LFU entry ...
 				WebCacheEntry wce = null;
 				for (Enumeration en = cache.keys(); en.hasMoreElements(); ) {
 					String su = (String)en.nextElement();
 					WebCacheEntry e = (WebCacheEntry)cache.get(su);
-					if (wce == null) wce = e;
-					else {
-						if (wce.getLastRead() > e.getLastRead()) wce = e; // alegem pagina cea mai veche accesata pentru stergere (LRU)
-					}
+
+                    if (!e.getURL().equals(url)) {
+                        continue;
+                    }
+
+                    if (wce == null) {
+                        wce = e;
+                    } else {
+                        if (e.timesUsed < wce.timesUsed) {
+                            wce = e; // alegem pagina LFU
+                        }
+                    }
 				}
 				if (wce == null) break;
 				// stergem respectiva intrare din cache

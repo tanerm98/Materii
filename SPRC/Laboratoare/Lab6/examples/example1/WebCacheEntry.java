@@ -34,6 +34,8 @@ public class WebCacheEntry implements Serializable {
 	private long writeDate = -1;
 	// cand a fost accesata ultima data aceasta intrare
 	private long readDate = -1;
+
+	public long timesUsed;
 	
 	/**
 	 * Constructorul clasei.
@@ -41,6 +43,11 @@ public class WebCacheEntry implements Serializable {
 	 */
 	public WebCacheEntry(String url) {
 		this.url = url;
+		this.timesUsed = 0;
+	}
+
+	public void accessEntry() {
+		this.timesUsed++;
 	}
 	
 	/**

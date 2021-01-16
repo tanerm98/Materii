@@ -99,7 +99,7 @@ public class ClientTest {
 			int poz = r.nextInt(urls.length);
 			String page = cache.requestURL(urls[poz]);
 			System.out.println(urls[poz]);
-			System.out.println(page);
+//			System.out.println(page);
 			try { Thread.sleep(1000); } catch (Throwable t) { }
 		}
 	}
