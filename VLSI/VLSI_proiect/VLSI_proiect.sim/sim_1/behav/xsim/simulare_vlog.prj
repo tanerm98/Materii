@@ -1,0 +1,16 @@
+# compile verilog/system verilog design source files
+verilog xil_defaultlib  \
+"../../../../VLSI_proiect.srcs/sources_1/imports/surse/alu.v" \
+"../../../../VLSI_proiect.srcs/sources_1/imports/surse/caledate.v" \
+"../../../../VLSI_proiect.srcs/sources_1/imports/surse/comanda.v" \
+"../../../../VLSI_proiect.srcs/sources_1/imports/surse/final.v" \
+"../../../../VLSI_proiect.srcs/sources_1/imports/surse/mux2la1.v" \
+"../../../../VLSI_proiect.srcs/sources_1/imports/surse/mux4la1.v" \
+"../../../../VLSI_proiect.srcs/sources_1/imports/surse/registri.v" \
+"../../../../VLSI_proiect.srcs/sources_1/imports/surse/simulare.v" \
+
+# compile glbl module
+verilog xil_defaultlib "glbl.v"
+
+# Do not sort compile order
+nosort

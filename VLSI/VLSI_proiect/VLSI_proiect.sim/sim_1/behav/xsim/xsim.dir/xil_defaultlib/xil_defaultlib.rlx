@@ -1,0 +1,13 @@
+0.6
+2019.2
+Nov  6 2019
+21:57:16
+C:/Users/Taner/Desktop/VLSI/VLSI_proiect/VLSI_proiect.sim/sim_1/behav/xsim/glbl.v,1573089660,verilog,,,,glbl,,,,,,,,
+C:/Users/Taner/Desktop/VLSI/VLSI_proiect/VLSI_proiect.srcs/sources_1/imports/surse/alu.v,1618161379,verilog,,C:/Users/Taner/Desktop/VLSI/VLSI_proiect/VLSI_proiect.srcs/sources_1/imports/surse/caledate.v,,alu,,,,,,,,
+C:/Users/Taner/Desktop/VLSI/VLSI_proiect/VLSI_proiect.srcs/sources_1/imports/surse/caledate.v,1618161619,verilog,,C:/Users/Taner/Desktop/VLSI/VLSI_proiect/VLSI_proiect.srcs/sources_1/imports/surse/comanda.v,,caledate,,,,,,,,
+C:/Users/Taner/Desktop/VLSI/VLSI_proiect/VLSI_proiect.srcs/sources_1/imports/surse/comanda.v,1618161827,verilog,,C:/Users/Taner/Desktop/VLSI/VLSI_proiect/VLSI_proiect.srcs/sources_1/imports/surse/final.v,,comanda,,,,,,,,
+C:/Users/Taner/Desktop/VLSI/VLSI_proiect/VLSI_proiect.srcs/sources_1/imports/surse/final.v,1618159411,verilog,,C:/Users/Taner/Desktop/VLSI/VLSI_proiect/VLSI_proiect.srcs/sources_1/imports/surse/mux2la1.v,,final,,,,,,,,
+C:/Users/Taner/Desktop/VLSI/VLSI_proiect/VLSI_proiect.srcs/sources_1/imports/surse/mux2la1.v,1618159450,verilog,,C:/Users/Taner/Desktop/VLSI/VLSI_proiect/VLSI_proiect.srcs/sources_1/imports/surse/mux4la1.v,,mux2la1,,,,,,,,
+C:/Users/Taner/Desktop/VLSI/VLSI_proiect/VLSI_proiect.srcs/sources_1/imports/surse/mux4la1.v,1618154285,verilog,,C:/Users/Taner/Desktop/VLSI/VLSI_proiect/VLSI_proiect.srcs/sources_1/imports/surse/registri.v,,mux4la1,,,,,,,,
+C:/Users/Taner/Desktop/VLSI/VLSI_proiect/VLSI_proiect.srcs/sources_1/imports/surse/registri.v,1618154291,verilog,,C:/Users/Taner/Desktop/VLSI/VLSI_proiect/VLSI_proiect.srcs/sources_1/imports/surse/simulare.v,,registri,,,,,,,,
+C:/Users/Taner/Desktop/VLSI/VLSI_proiect/VLSI_proiect.srcs/sources_1/imports/surse/simulare.v,1618155037,verilog,,,,simulare,,,,,,,,
